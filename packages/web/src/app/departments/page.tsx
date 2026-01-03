@@ -38,7 +38,7 @@ interface Department {
     id: number;
     name: string;
     description: string | null;
-    created_at: string;
+    createdAt: string;
 }
 
 export default function DepartmentsPage() {
@@ -189,7 +189,7 @@ export default function DepartmentsPage() {
                                     <Table.Td fw={500}>{dept.name}</Table.Td>
                                     <Table.Td>{dept.description || '-'}</Table.Td>
                                     <Table.Td>
-                                        {new Date(dept.created_at).toLocaleDateString('vi-VN')}
+                                        {new Date(dept.createdAt).toLocaleDateString('vi-VN')}
                                     </Table.Td>
                                     <Table.Td>
                                         <Group gap="xs">

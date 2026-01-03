@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import db from '../db/index.js';
+import prisma from '../db/prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
@@ -15,9 +15,11 @@ interface Department {
 }
 
 // Get all departments
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const departments = db.query('SELECT * FROM departments ORDER BY name').all();
+        const departments = await prisma.department.findMany({
+            orderBy: { name: 'asc' },
+        });
         res.json(departments);
     } catch (error) {
         console.error('Get departments error:', error);
@@ -26,10 +28,12 @@ router.get('/', (req, res) => {
 });
 
 // Get department by ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const department = db.query('SELECT * FROM departments WHERE id = ?').get(id);
+        const department = await prisma.department.findUnique({
+            where: { id: Number(id) },
+        });
 
         if (!department) {
             return res.status(404).json({ error: 'Department not found' });
@@ -43,7 +47,7 @@ router.get('/:id', (req, res) => {
 });
 
 // Create department
-router.post('/', (req: AuthRequest, res) => {
+router.post('/', async (req: AuthRequest, res) => {
     try {
         const { name, description } = req.body;
 
@@ -51,14 +55,17 @@ router.post('/', (req: AuthRequest, res) => {
             return res.status(400).json({ error: 'Name is required' });
         }
 
-        const stmt = db.prepare('INSERT INTO departments (name, description) VALUES (?, ?)');
-        const result = stmt.run(name, description || null);
+        const department = await prisma.department.create({
+            data: {
+                name,
+                description,
+            },
+        });
 
-        const department = db.query('SELECT * FROM departments WHERE id = ?').get(result.lastInsertRowid);
         res.status(201).json(department);
     } catch (error: any) {
         console.error('Create department error:', error);
-        if (error.message?.includes('UNIQUE constraint')) {
+        if (error.code === 'P2002') {
             return res.status(400).json({ error: 'Department name already exists' });
         }
         res.status(500).json({ error: 'Failed to create department' });
@@ -66,43 +73,45 @@ router.post('/', (req: AuthRequest, res) => {
 });
 
 // Update department
-router.put('/:id', (req: AuthRequest, res) => {
+router.put('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
         const { name, description } = req.body;
 
-        const existing = db.query('SELECT * FROM departments WHERE id = ?').get(id) as Department | undefined;
-        if (!existing) {
-            return res.status(404).json({ error: 'Department not found' });
-        }
+        const department = await prisma.department.update({
+            where: { id: Number(id) },
+            data: {
+                name,
+                description,
+            },
+        });
 
-        const stmt = db.prepare('UPDATE departments SET name = ?, description = ? WHERE id = ?');
-        stmt.run(name || existing.name, description ?? existing.description, id);
-
-        const department = db.query('SELECT * FROM departments WHERE id = ?').get(id);
         res.json(department);
     } catch (error: any) {
         console.error('Update department error:', error);
-        if (error.message?.includes('UNIQUE constraint')) {
+        if (error.code === 'P2002') {
             return res.status(400).json({ error: 'Department name already exists' });
+        }
+        if (error.code === 'P2025') {
+            return res.status(404).json({ error: 'Department not found' });
         }
         res.status(500).json({ error: 'Failed to update department' });
     }
 });
 
 // Delete department
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        const existing = db.query('SELECT * FROM departments WHERE id = ?').get(id);
-        if (!existing) {
+        await prisma.department.delete({
+            where: { id: Number(id) },
+        });
+        res.json({ message: 'Department deleted' });
+    } catch (error: any) {
+        if (error.code === 'P2025') {
             return res.status(404).json({ error: 'Department not found' });
         }
-
-        db.run('DELETE FROM departments WHERE id = ?', [id]);
-        res.json({ message: 'Department deleted' });
-    } catch (error) {
         console.error('Delete department error:', error);
         res.status(500).json({ error: 'Failed to delete department' });
     }

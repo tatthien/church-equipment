@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Brand {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  equipment   Equipment[]
+
+  @@map("brands")
+}
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  equipment   Equipment[]
+
+  @@map("departments")
+}
+
+model Equipment {
+  id           Int       @id @default(autoincrement())
+  name         String
+  purchaseDate DateTime?   @map("purchase_date")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  status       String    @default("new")
+  
+  departmentId Int?      @map("department_id")
+  createdBy    Int?      @map("created_by")
+  brandId      Int?      @map("brand_id")
+
+  department   Department? @relation(fields: [departmentId], references: [id])
+  creator      User?       @relation(fields: [createdBy], references: [id])
+  brand        Brand?      @relation(fields: [brandId], references: [id])
+
+  @@map("equipment")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  equipment Equipment[]
+
+  @@map("users")
+}

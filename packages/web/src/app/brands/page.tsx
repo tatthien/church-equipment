@@ -38,7 +38,7 @@ interface Brand {
     id: number;
     name: string;
     description: string | null;
-    created_at: string;
+    createdAt: string;
 }
 
 export default function BrandsPage() {
@@ -189,7 +189,7 @@ export default function BrandsPage() {
                                     <Table.Td fw={500}>{brand.name}</Table.Td>
                                     <Table.Td>{brand.description || '-'}</Table.Td>
                                     <Table.Td>
-                                        {new Date(brand.created_at).toLocaleDateString('vi-VN')}
+                                        {new Date(brand.createdAt).toLocaleDateString('vi-VN')}
                                     </Table.Td>
                                     <Table.Td>
                                         <Group gap="xs">
@@ -203,7 +203,7 @@ export default function BrandsPage() {
                                                 variant="subtle"
                                                 color="red"
                                                 onClick={() => handleDelete(brand.id)}
-                                            >
+                                            >sl
                                                 <IconTrash size={16} />
                                             </ActionIcon>
                                         </Group>

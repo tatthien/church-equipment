@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import db from '../db/index.js';
+import prisma from '../db/prisma.js';
 import { generateToken, authMiddleware, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
@@ -15,7 +15,7 @@ router.post('/register', async (req, res) => {
         }
 
         // Check if user exists
-        const existingUser = db.query('SELECT id FROM users WHERE username = ?').get(username);
+        const existingUser = await prisma.user.findUnique({ where: { username } });
         if (existingUser) {
             return res.status(400).json({ error: 'Username already exists' });
         }
@@ -24,13 +24,17 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insert user
-        const stmt = db.prepare('INSERT INTO users (username, password, name) VALUES (?, ?, ?)');
-        const result = stmt.run(username, hashedPassword, name);
+        const user = await prisma.user.create({
+            data: {
+                username,
+                password: hashedPassword,
+                name,
+            },
+        });
 
-        const user = { id: result.lastInsertRowid as number, username, name };
-        const token = generateToken(user);
+        const token = generateToken({ id: user.id, username, name });
 
-        res.status(201).json({ user, token });
+        res.status(201).json({ user: { id: user.id, username: user.username, name: user.name }, token });
     } catch (error) {
         console.error('Register error:', error);
         res.status(500).json({ error: 'Failed to register' });
@@ -47,12 +51,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Find user
-        const user = db.query('SELECT * FROM users WHERE username = ?').get(username) as {
-            id: number;
-            username: string;
-            password: string;
-            name: string;
-        } | undefined;
+        const user = await prisma.user.findUnique({ where: { username } });
 
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });

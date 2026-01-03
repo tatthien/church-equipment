@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import './db/index.js'; // Initialize database
+
 import authRoutes from './routes/auth.js';
 import departmentsRoutes from './routes/departments.js';
 import equipmentRoutes from './routes/equipment.js';

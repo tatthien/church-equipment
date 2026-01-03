@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import db from '../db/index.js';
+import prisma from '../db/prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
@@ -7,9 +7,11 @@ const router = Router();
 router.use(authMiddleware);
 
 // Get all brands
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const brands = db.query('SELECT * FROM brands ORDER BY name ASC').all();
+        const brands = await prisma.brand.findMany({
+            orderBy: { name: 'asc' },
+        });
         res.json(brands);
     } catch (error) {
         console.error('Get brands error:', error);
@@ -18,7 +20,7 @@ router.get('/', (req, res) => {
 });
 
 // Create brand
-router.post('/', (req: AuthRequest, res) => {
+router.post('/', async (req: AuthRequest, res) => {
     try {
         const { name, description } = req.body;
 
@@ -26,13 +28,16 @@ router.post('/', (req: AuthRequest, res) => {
             return res.status(400).json({ error: 'Name is required' });
         }
 
-        const stmt = db.prepare('INSERT INTO brands (name, description) VALUES (?, ?)');
-        const result = stmt.run(name, description || null);
+        const brand = await prisma.brand.create({
+            data: {
+                name,
+                description,
+            },
+        });
 
-        const brand = db.query('SELECT * FROM brands WHERE id = ?').get(result.lastInsertRowid);
         res.status(201).json(brand);
     } catch (error: any) {
-        if (error.message?.includes('UNIQUE constraint failed')) {
+        if (error.code === 'P2002') {
             return res.status(400).json({ error: 'Brand already exists' });
         }
         console.error('Create brand error:', error);
@@ -41,19 +46,26 @@ router.post('/', (req: AuthRequest, res) => {
 });
 
 // Update brand
-router.put('/:id', (req: AuthRequest, res) => {
+router.put('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
         const { name, description } = req.body;
 
-        const stmt = db.prepare('UPDATE brands SET name = ?, description = ? WHERE id = ?');
-        stmt.run(name, description || null, id);
+        const brand = await prisma.brand.update({
+            where: { id: Number(id) },
+            data: {
+                name,
+                description,
+            },
+        });
 
-        const brand = db.query('SELECT * FROM brands WHERE id = ?').get(id);
         res.json(brand);
     } catch (error: any) {
-        if (error.message?.includes('UNIQUE constraint failed')) {
+        if (error.code === 'P2002') {
             return res.status(400).json({ error: 'Brand name already exists' });
+        }
+        if (error.code === 'P2025') {
+            return res.status(404).json({ error: 'Brand not found' });
         }
         console.error('Update brand error:', error);
         res.status(500).json({ error: 'Failed to update brand' });
@@ -61,12 +73,17 @@ router.put('/:id', (req: AuthRequest, res) => {
 });
 
 // Delete brand
-router.delete('/:id', (req: AuthRequest, res) => {
+router.delete('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
-        db.run('DELETE FROM brands WHERE id = ?', [id]);
+        await prisma.brand.delete({
+            where: { id: Number(id) },
+        });
         res.json({ message: 'Brand deleted' });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({ error: 'Brand not found' });
+        }
         console.error('Delete brand error:', error);
         res.status(500).json({ error: 'Failed to delete brand' });
     }
