@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Database
+*.db
+
+# Environment
+.env
+.env.local
+
+# Build
+dist/
+.next/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
