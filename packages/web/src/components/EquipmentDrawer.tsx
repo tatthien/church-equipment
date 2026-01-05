@@ -11,6 +11,8 @@ import {
 } from '@/hooks/useEquipment';
 import { useGetBrandsQuery } from '@/hooks/useBrands';
 import { useGetDepartmentsQuery } from '@/hooks/useDepartments';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { equipmentSchema } from '@/lib/schemas';
 
 interface Equipment {
     id: number;
@@ -48,6 +50,8 @@ export default function EquipmentDrawer({
     const createMutation = useCreateEquipmentMutation();
     const updateMutation = useUpdateEquipmentMutation();
 
+    // ...
+
     const form = useForm({
         initialValues: {
             name: '',
@@ -56,9 +60,7 @@ export default function EquipmentDrawer({
             status: 'new',
             department_id: '',
         },
-        validate: {
-            name: (value) => (!value ? 'Tên thiết bị là bắt buộc' : null),
-        },
+        validate: zod4Resolver(equipmentSchema),
     });
 
     useEffect(() => {
@@ -136,7 +138,7 @@ export default function EquipmentDrawer({
                     <TextInput
                         label="Tên thiết bị"
                         placeholder="VD: Microphone SM58"
-                        required
+                        withAsterisk
                         {...form.getInputProps('name')}
                     />
 

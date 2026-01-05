@@ -33,6 +33,8 @@ import {
     useUpdateBrandMutation,
     useDeleteBrandMutation,
 } from '@/hooks/useBrands';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { brandSchema } from '@/lib/schemas';
 
 interface Brand {
     id: number;
@@ -54,13 +56,12 @@ export default function BrandsPage() {
     const deleteMutation = useDeleteBrandMutation();
 
     const form = useForm({
+        mode: 'uncontrolled',
         initialValues: {
             name: '',
             description: '',
         },
-        validate: {
-            name: (value) => (!value ? 'Tên hãng là bắt buộc' : null),
-        },
+        validate: zod4Resolver(brandSchema),
     });
 
     useEffect(() => {
@@ -225,12 +226,14 @@ export default function BrandsPage() {
                         <TextInput
                             label="Tên hãng"
                             placeholder="VD: Sony"
-                            required
+                            key={form.key('name')}
+                            withAsterisk
                             {...form.getInputProps('name')}
                         />
                         <Textarea
                             label="Mô tả"
                             placeholder="Mô tả hãng..."
+                            key={form.key('description')}
                             {...form.getInputProps('description')}
                         />
                         <Button type="submit" fullWidth loading={isSubmitting}>

@@ -18,20 +18,20 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconBuildingChurch } from '@tabler/icons-react';
 import { useAuth } from '@/lib/auth';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { loginSchema } from '@/lib/schemas';
 
 export default function LoginPage() {
     const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm({
+        mode: 'uncontrolled',
         initialValues: {
             username: '',
             password: '',
         },
-        validate: {
-            username: (value) => (value.length < 3 ? 'Tên đăng nhập phải có ít nhất 3 ký tự' : null),
-            password: (value) => (value.length < 6 ? 'Mật khẩu phải có ít nhất 6 ký tự' : null),
-        },
+        validate: zod4Resolver(loginSchema),
     });
 
     const handleSubmit = async (values: typeof form.values) => {
@@ -64,16 +64,13 @@ export default function LoginPage() {
                 justifyContent: 'center',
             }}
         >
-            <Container size={420}>
+            <Container size={400} flex={1}>
                 <Center mb="xl">
                     <Box style={{ textAlign: 'center', color: 'white' }}>
                         <IconBuildingChurch size={64} stroke={1.5} />
                         <Title order={2} mt="sm">
                             Church Equipment
                         </Title>
-                        <Text size="sm" opacity={0.8}>
-                            Quản lý thiết bị nhà thờ
-                        </Text>
                     </Box>
                 </Center>
 
@@ -87,14 +84,14 @@ export default function LoginPage() {
                             <TextInput
                                 label="Tên đăng nhập"
                                 placeholder="username"
-                                required
+                                key={form.key('username')}
                                 {...form.getInputProps('username')}
                             />
 
                             <PasswordInput
                                 label="Mật khẩu"
                                 placeholder="••••••"
-                                required
+                                key={form.key('password')}
                                 {...form.getInputProps('password')}
                             />
 

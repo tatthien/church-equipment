@@ -33,6 +33,8 @@ import {
     useUpdateDepartmentMutation,
     useDeleteDepartmentMutation,
 } from '@/hooks/useDepartments';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { departmentSchema } from '@/lib/schemas';
 
 interface Department {
     id: number;
@@ -58,9 +60,7 @@ export default function DepartmentsPage() {
             name: '',
             description: '',
         },
-        validate: {
-            name: (value) => (!value ? 'Tên bộ phận là bắt buộc' : null),
-        },
+        validate: zod4Resolver(departmentSchema),
     });
 
     useEffect(() => {
@@ -225,7 +225,7 @@ export default function DepartmentsPage() {
                         <TextInput
                             label="Tên bộ phận"
                             placeholder="VD: Âm thanh"
-                            required
+                            withAsterisk
                             {...form.getInputProps('name')}
                         />
                         <Textarea

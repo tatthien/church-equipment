@@ -36,6 +36,8 @@ import {
     useUpdateUserMutation,
     useDeleteUserMutation,
 } from '@/hooks/useUsers';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { userCreateSchema, userUpdateSchema } from '@/lib/schemas';
 
 interface User {
     id: number;
@@ -58,6 +60,8 @@ export default function UsersPage() {
     const updateMutation = useUpdateUserMutation();
     const deleteMutation = useDeleteUserMutation();
 
+    // ...
+
     const form = useForm({
         initialValues: {
             username: '',
@@ -65,11 +69,7 @@ export default function UsersPage() {
             name: '',
             role: 'user',
         },
-        validate: {
-            username: (value) => (!value ? 'Username bắt buộc' : null),
-            name: (value) => (!value ? 'Tên bắt buộc' : null),
-            password: (value) => (!editingUser && !value ? 'Mật khẩu bắt buộc' : null),
-        },
+        validate: zod4Resolver(editingUser ? userUpdateSchema : userCreateSchema),
     });
 
     useEffect(() => {
@@ -256,20 +256,20 @@ export default function UsersPage() {
                         <TextInput
                             label="Username"
                             placeholder="username"
-                            required
+                            withAsterisk
                             {...form.getInputProps('username')}
                         // readOnly={!!editingUser} // Can allow update if backend supports it
                         />
                         <TextInput
                             label="Tên hiển thị"
                             placeholder="Họ Tên"
-                            required
+                            withAsterisk
                             {...form.getInputProps('name')}
                         />
                         <PasswordInput
                             label="Mật khẩu"
                             placeholder={editingUser ? 'Để trống nếu không đổi' : 'Mật khẩu'}
-                            required={!editingUser}
+                            withAsterisk
                             {...form.getInputProps('password')}
                         />
                         <Select
@@ -278,7 +278,6 @@ export default function UsersPage() {
                                 { value: 'user', label: 'User' },
                                 { value: 'admin', label: 'Admin' },
                             ]}
-                            required
                             {...form.getInputProps('role')}
                         />
                         <Button type="submit" fullWidth loading={isSubmitting}>
