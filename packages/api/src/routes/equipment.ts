@@ -2,6 +2,7 @@ import { Router } from 'express';
 import prisma from '../db/prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { generateQRCode } from '../services/qrcode.js';
+import { getPaginationParams, getSkip, paginateResults } from '../utils/pagination.js';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ interface Equipment {
 router.get('/', async (req: AuthRequest, res) => {
     try {
         const { status, department_id, brand_id, search } = req.query;
+        const { page, limit } = getPaginationParams(req.query);
 
         const where: any = {};
         if (status) where.status = status as string;
@@ -49,6 +51,9 @@ router.get('/', async (req: AuthRequest, res) => {
             where.createdBy = req.user?.id;
         }
 
+        // Get total count for pagination
+        const total = await prisma.equipment.count({ where });
+
         const equipments = await prisma.equipment.findMany({
             where,
             include: {
@@ -57,6 +62,8 @@ router.get('/', async (req: AuthRequest, res) => {
                 creator: true,
             },
             orderBy: { createdAt: 'desc' },
+            skip: getSkip(page, limit),
+            take: limit,
         });
 
         // Map to match legacy API response structure
@@ -67,7 +74,7 @@ router.get('/', async (req: AuthRequest, res) => {
             created_by_name: e.creator?.name || null,
         }));
 
-        res.json(mappedEquipments);
+        res.json(paginateResults(mappedEquipments, total, page, limit));
     } catch (error) {
         console.error('Get equipment error:', error);
         res.status(500).json({ error: 'Failed to get equipment' });

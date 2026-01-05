@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import prisma from '../db/prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { getPaginationParams, getSkip, paginateResults } from '../utils/pagination.js';
 
 const router = Router();
 
@@ -17,10 +18,17 @@ interface Department {
 // Get all departments
 router.get('/', async (req, res) => {
     try {
+        const { page, limit } = getPaginationParams(req.query);
+
+        const total = await prisma.department.count();
+
         const departments = await prisma.department.findMany({
             orderBy: { name: 'asc' },
+            skip: getSkip(page, limit),
+            take: limit,
         });
-        res.json(departments);
+
+        res.json(paginateResults(departments, total, page, limit));
     } catch (error) {
         console.error('Get departments error:', error);
         res.status(500).json({ error: 'Failed to get departments' });

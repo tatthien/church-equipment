@@ -1,7 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { equipmentApi } from '@/lib/api';
 
-export const useGetEquipmentQuery = (params?: { status?: string; department_id?: number; brand_id?: number; search?: string }) => {
+export const useGetEquipmentQuery = (params?: {
+    status?: string;
+    department_id?: number;
+    brand_id?: number;
+    search?: string;
+    page?: number;
+    limit?: number;
+}) => {
     return useQuery({
         queryKey: ['equipment', params],
         queryFn: async () => {

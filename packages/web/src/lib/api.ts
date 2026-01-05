@@ -42,7 +42,7 @@ export const authApi = {
 
 // Departments API
 export const departmentsApi = {
-    getAll: () => api.get('/api/departments'),
+    getAll: (params?: { page?: number; limit?: number }) => api.get('/api/departments', { params }),
     getById: (id: number) => api.get(`/api/departments/${id}`),
     create: (data: { name: string; description?: string }) =>
         api.post('/api/departments', data),
@@ -53,7 +53,7 @@ export const departmentsApi = {
 
 // Brands API
 export const brandsApi = {
-    getAll: () => api.get('/api/brands'),
+    getAll: (params?: { page?: number; limit?: number }) => api.get('/api/brands', { params }),
     create: (data: { name: string; description?: string }) =>
         api.post('/api/brands', data),
     update: (id: number, data: { name?: string; description?: string }) =>

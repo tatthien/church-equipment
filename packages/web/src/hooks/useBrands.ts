@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { brandsApi } from '@/lib/api';
 
-export const useGetBrandsQuery = () => {
+export const useGetBrandsQuery = (params?: { page?: number; limit?: number }) => {
     return useQuery({
-        queryKey: ['brands'],
+        queryKey: ['brands', params],
         queryFn: async () => {
-            const { data } = await brandsApi.getAll();
+            const { data } = await brandsApi.getAll(params);
             return data;
         },
     });

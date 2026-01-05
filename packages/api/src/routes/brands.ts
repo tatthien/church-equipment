@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import prisma from '../db/prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { getPaginationParams, getSkip, paginateResults } from '../utils/pagination.js';
 
 const router = Router();
 
@@ -9,10 +10,17 @@ router.use(authMiddleware);
 // Get all brands
 router.get('/', async (req, res) => {
     try {
+        const { page, limit } = getPaginationParams(req.query);
+
+        const total = await prisma.brand.count();
+
         const brands = await prisma.brand.findMany({
             orderBy: { name: 'asc' },
+            skip: getSkip(page, limit),
+            take: limit,
         });
-        res.json(brands);
+
+        res.json(paginateResults(brands, total, page, limit));
     } catch (error) {
         console.error('Get brands error:', error);
         res.status(500).json({ error: 'Failed to get brands' });

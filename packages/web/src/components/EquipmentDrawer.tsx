@@ -44,8 +44,8 @@ export default function EquipmentDrawer({
     equipment,
 }: EquipmentDrawerProps) {
     const isEditing = !!equipment;
-    const { data: brands = [] } = useGetBrandsQuery();
-    const { data: departments = [] } = useGetDepartmentsQuery();
+    const { data: brands } = useGetBrandsQuery({ limit: 1000 });
+    const { data: departments } = useGetDepartmentsQuery({ limit: 1000 });
 
     const createMutation = useCreateEquipmentMutation();
     const updateMutation = useUpdateEquipmentMutation();
@@ -80,11 +80,11 @@ export default function EquipmentDrawer({
     }, [opened, equipment]);
 
     const brandOptions = useMemo(() => {
-        return brands.map((b: any) => ({ value: String(b.id), label: b.name }));
+        return brands?.data.map((b: any) => ({ value: String(b.id), label: b.name }));
     }, [brands]);
 
     const departmentOptions = useMemo(() => {
-        return departments.map((d: any) => ({ value: String(d.id), label: d.name }));
+        return departments?.data.map((d: any) => ({ value: String(d.id), label: d.name }));
     }, [departments]);
 
     const handleSubmit = async (values: typeof form.values) => {

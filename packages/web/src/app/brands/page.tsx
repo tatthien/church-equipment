@@ -35,6 +35,7 @@ import {
 } from '@/hooks/useBrands';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { brandSchema } from '@/lib/schemas';
+import DataPagination from '@/components/DataPagination';
 
 interface Brand {
     id: number;
@@ -49,8 +50,11 @@ export default function BrandsPage() {
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+    const [page, setPage] = useState(1);
 
-    const { data: brands = [], isLoading } = useGetBrandsQuery();
+    const { data: brandsResponse, isLoading } = useGetBrandsQuery({ page, limit: 20 });
+    const brands = brandsResponse?.data || [];
+    const pagination = brandsResponse?.pagination;
     const createMutation = useCreateBrandMutation();
     const updateMutation = useUpdateBrandMutation();
     const deleteMutation = useDeleteBrandMutation();
@@ -213,6 +217,15 @@ export default function BrandsPage() {
                             ))}
                         </Table.Tbody>
                     </Table>
+                )}
+                {pagination && (
+                    <DataPagination
+                        page={pagination.page}
+                        totalPages={pagination.totalPages}
+                        total={pagination.total}
+                        limit={pagination.limit}
+                        onChange={setPage}
+                    />
                 )}
             </Paper>
 

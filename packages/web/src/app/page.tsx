@@ -34,6 +34,7 @@ import AppLayout from '@/components/AppLayout';
 import { useGetEquipmentQuery, useDeleteEquipmentMutation } from '@/hooks/useEquipment';
 import { useGetBrandsQuery } from '@/hooks/useBrands';
 import { useGetDepartmentsQuery } from '@/hooks/useDepartments';
+import DataPagination from '@/components/DataPagination';
 
 interface Equipment {
     id: number;
@@ -74,6 +75,7 @@ export default function HomePage() {
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [departmentFilter, setDepartmentFilter] = useState<string | null>(null);
     const [brandFilter, setBrandFilter] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
 
     // Modal states
     const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
@@ -81,15 +83,20 @@ export default function HomePage() {
     const [qrModalOpen, setQrModalOpen] = useState(false);
     const [qrEquipment, setQrEquipment] = useState<Equipment | null>(null);
 
-    const { data: equipment = [], isLoading: equipmentLoading } = useGetEquipmentQuery({
+    const { data: equipmentResponse, isLoading: equipmentLoading } = useGetEquipmentQuery({
         search: debouncedSearch,
         status: statusFilter || undefined,
         department_id: departmentFilter ? Number(departmentFilter) : undefined,
         brand_id: brandFilter ? Number(brandFilter) : undefined,
+        page,
+        limit: 20,
     });
 
-    const { data: brands = [] } = useGetBrandsQuery();
-    const { data: departments = [] } = useGetDepartmentsQuery();
+    const equipment = equipmentResponse?.data || [];
+    const pagination = equipmentResponse?.pagination;
+
+    const { data: brands } = useGetBrandsQuery({ limit: 1000 });
+    const { data: departments } = useGetDepartmentsQuery({ limit: 1000 });
     const deleteMutation = useDeleteEquipmentMutation();
 
     useEffect(() => {
@@ -127,6 +134,11 @@ export default function HomePage() {
         setQrModalOpen(true);
     };
 
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, statusFilter, departmentFilter, brandFilter]);
+
     // Client-side filtering removed, using API results directly
     const filteredEquipment = equipment;
 
@@ -154,7 +166,7 @@ export default function HomePage() {
                         placeholder="Hãng"
                         clearable
                         searchable
-                        data={brands.map((b: any) => ({ value: String(b.id), label: b.name }))}
+                        data={brands?.data.map((b: any) => ({ value: String(b.id), label: b.name }))}
                         value={brandFilter}
                         onChange={setBrandFilter}
                         w={150}
@@ -170,7 +182,7 @@ export default function HomePage() {
                     <Select
                         placeholder="Bộ phận"
                         clearable
-                        data={departments.map((d: any) => ({ value: String(d.id), label: d.name }))}
+                        data={departments?.data.map((d: any) => ({ value: String(d.id), label: d.name }))}
                         value={departmentFilter}
                         onChange={setDepartmentFilter}
                         w={150}
@@ -273,6 +285,15 @@ export default function HomePage() {
                             ))}
                         </Table.Tbody>
                     </Table>
+                )}
+                {pagination && (
+                    <DataPagination
+                        page={pagination.page}
+                        totalPages={pagination.totalPages}
+                        total={pagination.total}
+                        limit={pagination.limit}
+                        onChange={setPage}
+                    />
                 )}
             </Paper>
 

@@ -35,6 +35,7 @@ import {
 } from '@/hooks/useDepartments';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { departmentSchema } from '@/lib/schemas';
+import DataPagination from '@/components/DataPagination';
 
 interface Department {
     id: number;
@@ -49,8 +50,11 @@ export default function DepartmentsPage() {
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editingDept, setEditingDept] = useState<Department | null>(null);
+    const [page, setPage] = useState(1);
 
-    const { data: departments = [], isLoading } = useGetDepartmentsQuery();
+    const { data: departmentsResponse, isLoading } = useGetDepartmentsQuery({ page, limit: 20 });
+    const departments = departmentsResponse?.data || [];
+    const pagination = departmentsResponse?.pagination;
     const createMutation = useCreateDepartmentMutation();
     const updateMutation = useUpdateDepartmentMutation();
     const deleteMutation = useDeleteDepartmentMutation();
@@ -212,6 +216,15 @@ export default function DepartmentsPage() {
                             ))}
                         </Table.Tbody>
                     </Table>
+                )}
+                {pagination && (
+                    <DataPagination
+                        page={pagination.page}
+                        totalPages={pagination.totalPages}
+                        total={pagination.total}
+                        limit={pagination.limit}
+                        onChange={setPage}
+                    />
                 )}
             </Paper>
 
