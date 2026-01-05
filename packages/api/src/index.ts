@@ -6,6 +6,7 @@ import departmentsRoutes from './routes/departments.js';
 import equipmentRoutes from './routes/equipment.js';
 import brandsRoutes from './routes/brands.js';
 import usersRoutes from './routes/users.js';
+import publicRoutes from './routes/public.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,6 +19,7 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
+app.use('/api/public', publicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/departments', departmentsRoutes);
 app.use('/api/equipment', equipmentRoutes);

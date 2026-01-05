@@ -233,12 +233,11 @@ router.get('/:id/qrcode', async (req, res) => {
             return res.status(404).json({ error: 'Equipment not found' });
         }
 
-        const qrData = JSON.stringify({
-            id: equipment.id,
-            name: equipment.name,
-            brand: equipment.brand?.name || null,
-            status: equipment.status
-        });
+        const validStatuses = ['new', 'old', 'damaged', 'repairing', 'disposed'];
+
+        // Use FRONTEND_URL from env or default to localhost:3000
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const qrData = `${frontendUrl}/public/equipment/${id}`;
 
         const qrCode = await generateQRCode(qrData);
         res.json({ qrCode });

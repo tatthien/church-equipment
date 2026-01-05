@@ -89,4 +89,8 @@ export const equipmentApi = {
     getQRCode: (id: number) => api.get(`/api/equipment/${id}/qrcode`),
 };
 
+export const publicApi = {
+    getEquipment: (id: number) => api.get(`/api/public/equipment/${id}`),
+};
+
 export default api;
