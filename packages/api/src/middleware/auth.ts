@@ -8,6 +8,7 @@ export interface AuthRequest extends Request {
         id: number;
         username: string;
         name: string;
+        role: string;
     };
 }
 
@@ -25,6 +26,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
             id: number;
             username: string;
             name: string;
+            role: string;
         };
         req.user = decoded;
         next();
@@ -33,7 +35,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     }
 };
 
-export const generateToken = (user: { id: number; username: string; name: string }) => {
+export const generateToken = (user: { id: number; username: string; name: string; role: string }) => {
     return jwt.sign(user, JWT_SECRET, { expiresIn: '7d' });
 };
 

@@ -29,12 +29,13 @@ router.post('/register', async (req, res) => {
                 username,
                 password: hashedPassword,
                 name,
+                role: 'user', // Default role
             },
         });
 
-        const token = generateToken({ id: user.id, username, name });
+        const token = generateToken({ id: user.id, username, name, role: user.role });
 
-        res.status(201).json({ user: { id: user.id, username: user.username, name: user.name }, token });
+        res.status(201).json({ user: { id: user.id, username: user.username, name: user.name, role: user.role }, token });
     } catch (error) {
         console.error('Register error:', error);
         res.status(500).json({ error: 'Failed to register' });
@@ -63,7 +64,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        const userData = { id: user.id, username: user.username, name: user.name };
+        const userData = { id: user.id, username: user.username, name: user.name, role: user.role };
         const token = generateToken(userData);
 
         res.json({ user: userData, token });

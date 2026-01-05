@@ -19,6 +19,7 @@ import {
     IconBuilding,
     IconLogout,
     IconTag,
+    IconUsers,
 } from '@tabler/icons-react';
 import { useAuth } from '@/lib/auth';
 
@@ -72,6 +73,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
                                 style={{ borderRadius: 'var(--mantine-radius-md)' }}
                             />
                         ))}
+                        {/* Users Management - Admin Only */}
+                        {user?.role === 'admin' && (
+                            <NavLink
+                                label="Quản lý User"
+                                leftSection={<IconUsers size={18} />}
+                                active={pathname === '/users'}
+                                onClick={() => {
+                                    router.push('/users');
+                                    if (opened) toggle();
+                                }}
+                                style={{ borderRadius: 'var(--mantine-radius-md)' }}
+                            />
+                        )}
                     </Stack>
                 </AppShell.Section>
 

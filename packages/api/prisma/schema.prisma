@@ -54,6 +54,7 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
 
   equipment Equipment[]
+  role      String      @default("user")
 
   @@map("users")
 }

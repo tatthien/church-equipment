@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.js';
 import departmentsRoutes from './routes/departments.js';
 import equipmentRoutes from './routes/equipment.js';
 import brandsRoutes from './routes/brands.js';
+import usersRoutes from './routes/users.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,6 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/departments', departmentsRoutes);
 app.use('/api/equipment', equipmentRoutes);
 app.use('/api/brands', brandsRoutes);
+app.use('/api/users', usersRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -17,7 +17,7 @@ interface Equipment {
     name: string;
     brand: string | null;
     brand_id: number | null;
-    purchase_date: string | null;
+    purchaseDate: string | null;
     status: string;
     department_id: number | null;
 }
@@ -67,7 +67,7 @@ export default function EquipmentModal({
                 form.setValues({
                     name: equipment.name,
                     brand_id: equipment.brand_id ? String(equipment.brand_id) : '',
-                    purchase_date: equipment.purchase_date ? new Date(equipment.purchase_date) : null,
+                    purchase_date: equipment.purchaseDate ? new Date(equipment.purchaseDate) : null,
                     status: equipment.status,
                     department_id: equipment.department_id ? String(equipment.department_id) : '',
                 });

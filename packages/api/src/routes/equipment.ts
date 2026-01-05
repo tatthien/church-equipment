@@ -21,7 +21,7 @@ interface Equipment {
 }
 
 // Get all equipment with department info
-router.get('/', async (req, res) => {
+router.get('/', async (req: AuthRequest, res) => {
     try {
         const { status, department_id, brand_id } = req.query;
 
@@ -29,6 +29,11 @@ router.get('/', async (req, res) => {
         if (status) where.status = status as string;
         if (department_id) where.departmentId = Number(department_id);
         if (brand_id) where.brandId = Number(brand_id);
+
+        // Filter by createdBy for non-admin users
+        if (req.user?.role !== 'admin') {
+            where.createdBy = req.user?.id;
+        }
 
         const equipments = await prisma.equipment.findMany({
             where,
@@ -56,7 +61,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get equipment by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
         const equipment = await prisma.equipment.findUnique({
@@ -70,6 +75,11 @@ router.get('/:id', async (req, res) => {
 
         if (!equipment) {
             return res.status(404).json({ error: 'Equipment not found' });
+        }
+
+        // Check permission if not admin
+        if (req.user?.role !== 'admin' && equipment.createdBy !== req.user?.id) {
+            return res.status(403).json({ error: 'Forbidden' });
         }
 
         const mappedEquipment = {
@@ -141,6 +151,11 @@ router.put('/:id', async (req: AuthRequest, res) => {
             return res.status(404).json({ error: 'Equipment not found' });
         }
 
+        // Check permission
+        if (req.user?.role !== 'admin' && existing.createdBy !== req.user?.id) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
         const validStatuses = ['new', 'old', 'damaged', 'repairing', 'disposed'];
         if (status && !validStatuses.includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
@@ -151,20 +166,9 @@ router.put('/:id', async (req: AuthRequest, res) => {
             data: {
                 name,
                 brandId: brand_id !== undefined ? (brand_id ? Number(brand_id) : null) : undefined,
-                purchaseDate: purchase_date, // update if provided (even null), or undefined to skip? Rest logic usually works with "if undefined, ignore". Using undefined to skip.
-                // Assuming client sends fields they want to update. But logic in original code:
-                // stmt.run(name || existing.name, ...) which implies partial update logic manually.
-                // Prisma update 'data' automatically handles 'undefined' as 'do not update' if we construct the object conditionally,
-                // BUT simple assignment 'field: value' where value is undefined will usually set it to NULL if nullable, or ignore if Prisma object filtering works (it does NOT by default for undefined).
-                // However, let's look at original logic: name || existing.name. It allows partial updates.
-                // We should build the data object conditionally to allow partial updates.
-                // Or better, just rely on the fact that undefined in JS passed to Prisma usually means "do nothing" (actually in newer Prisma versions it does skip, but null sets to null).
-                // Let's implement partial update logic explicitly for safety.
-                ...(name && { name }),
-                ...(brand_id !== undefined && { brandId: brand_id ? Number(brand_id) : null }),
-                ...(purchase_date !== undefined && { purchaseDate: purchase_date }),
-                ...(status && { status }),
-                ...(department_id !== undefined && { departmentId: department_id ? Number(department_id) : null }),
+                purchaseDate: purchase_date,
+                status,
+                departmentId: department_id !== undefined ? (department_id ? Number(department_id) : null) : undefined,
             },
             include: {
                 department: true,
@@ -188,9 +192,20 @@ router.put('/:id', async (req: AuthRequest, res) => {
 });
 
 // Delete equipment
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
+        const existing = await prisma.equipment.findUnique({ where: { id: Number(id) } });
+
+        if (!existing) {
+            return res.status(404).json({ error: 'Equipment not found' });
+        }
+
+        // Check permission
+        if (req.user?.role !== 'admin' && existing.createdBy !== req.user?.id) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
         await prisma.equipment.delete({
             where: { id: Number(id) },
         });

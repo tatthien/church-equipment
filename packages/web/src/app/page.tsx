@@ -40,8 +40,8 @@ interface Equipment {
     brand: string | null;
     brand_id: number | null;
     brand_name: string | null;
-    purchase_date: string | null;
-    created_at: string;
+    purchaseDate: string | null;
+    createdAt: string;
     status: string;
     department_id: number | null;
     department_name: string | null;
@@ -233,8 +233,8 @@ export default function HomePage() {
                                         </Badge>
                                     </Table.Td>
                                     <Table.Td>
-                                        {item.purchase_date
-                                            ? new Date(item.purchase_date).toLocaleDateString('vi-VN')
+                                        {item.purchaseDate
+                                            ? new Date(item.purchaseDate).toLocaleDateString('vi-VN')
                                             : '-'}
                                     </Table.Td>
                                     <Table.Td>{item.created_by_name || '-'}</Table.Td>

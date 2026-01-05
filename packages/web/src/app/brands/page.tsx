@@ -203,7 +203,7 @@ export default function BrandsPage() {
                                                 variant="subtle"
                                                 color="red"
                                                 onClick={() => handleDelete(brand.id)}
-                                            >sl
+                                            >
                                                 <IconTrash size={16} />
                                             </ActionIcon>
                                         </Group>
