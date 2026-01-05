@@ -10,7 +10,6 @@ import {
     PasswordInput,
     Button,
     Text,
-    Anchor,
     Stack,
     Center,
     Box,
@@ -21,41 +20,29 @@ import { IconBuildingChurch } from '@tabler/icons-react';
 import { useAuth } from '@/lib/auth';
 
 export default function LoginPage() {
-    const { login, register } = useAuth();
-    const [isRegister, setIsRegister] = useState(false);
+    const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm({
         initialValues: {
             username: '',
             password: '',
-            name: '',
         },
         validate: {
             username: (value) => (value.length < 3 ? 'Tên đăng nhập phải có ít nhất 3 ký tự' : null),
             password: (value) => (value.length < 6 ? 'Mật khẩu phải có ít nhất 6 ký tự' : null),
-            name: (value) => (isRegister && value.length < 2 ? 'Tên phải có ít nhất 2 ký tự' : null),
         },
     });
 
     const handleSubmit = async (values: typeof form.values) => {
         setIsLoading(true);
         try {
-            if (isRegister) {
-                await register(values.username, values.password, values.name);
-                notifications.show({
-                    title: 'Thành công',
-                    message: 'Đăng ký thành công!',
-                    color: 'green',
-                });
-            } else {
-                await login(values.username, values.password);
-                notifications.show({
-                    title: 'Thành công',
-                    message: 'Đăng nhập thành công!',
-                    color: 'green',
-                });
-            }
+            await login(values.username, values.password);
+            notifications.show({
+                title: 'Thành công',
+                message: 'Đăng nhập thành công!',
+                color: 'green',
+            });
         } catch (error: any) {
             notifications.show({
                 title: 'Lỗi',
@@ -92,7 +79,7 @@ export default function LoginPage() {
 
                 <Paper withBorder shadow="xl" p={30} radius="lg">
                     <Title order={3} ta="center" mb="lg">
-                        {isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập'}
+                        Đăng nhập
                     </Title>
 
                     <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -111,27 +98,11 @@ export default function LoginPage() {
                                 {...form.getInputProps('password')}
                             />
 
-                            {isRegister && (
-                                <TextInput
-                                    label="Họ tên"
-                                    placeholder="Nguyễn Văn A"
-                                    required
-                                    {...form.getInputProps('name')}
-                                />
-                            )}
-
                             <Button type="submit" fullWidth mt="md" loading={isLoading}>
-                                {isRegister ? 'Đăng ký' : 'Đăng nhập'}
+                                Đăng nhập
                             </Button>
                         </Stack>
                     </form>
-
-                    <Text ta="center" mt="md" size="sm">
-                        {isRegister ? 'Đã có tài khoản? ' : 'Chưa có tài khoản? '}
-                        <Anchor component="button" type="button" onClick={() => setIsRegister(!isRegister)}>
-                            {isRegister ? 'Đăng nhập' : 'Đăng ký'}
-                        </Anchor>
-                    </Text>
                 </Paper>
             </Container>
         </Box>
