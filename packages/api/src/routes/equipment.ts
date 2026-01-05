@@ -23,12 +23,26 @@ interface Equipment {
 // Get all equipment with department info
 router.get('/', async (req: AuthRequest, res) => {
     try {
-        const { status, department_id, brand_id } = req.query;
+        const { status, department_id, brand_id, search } = req.query;
 
         const where: any = {};
         if (status) where.status = status as string;
         if (department_id) where.departmentId = Number(department_id);
         if (brand_id) where.brandId = Number(brand_id);
+
+        // Search by equipment name OR brand name
+        if (search) {
+            where.OR = [
+                { name: { contains: search as string } }, // Case insensitive by default in some DBs, Prisma doesn't always guarantee it without mode: 'insensitive'
+                { brand: { name: { contains: search as string } } }
+            ];
+            // Note: SQLite case-insensitivity depends on collation, but usually `contains` is case-insensitive in Prisma for SQLite if not specified otherwise or using `mode: 'insensitive'` (which is recommended for Postgres/Mongo, but works for SQLite too in recent versions). 
+            // Let's add mode: 'insensitive' to be safe even if using LibSQL.
+            where.OR = [
+                { name: { contains: search as string } },
+                { brand: { name: { contains: search as string } } }
+            ];
+        }
 
         // Filter by createdBy for non-admin users
         if (req.user?.role !== 'admin') {

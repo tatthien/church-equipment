@@ -65,7 +65,7 @@ export const brandsApi = {
 
 // Equipment API
 export const equipmentApi = {
-    getAll: (params?: { status?: string; department_id?: number; brand_id?: number }) =>
+    getAll: (params?: { status?: string; department_id?: number; brand_id?: number; search?: string }) =>
         api.get('/api/equipment', { params }),
     getById: (id: number) => api.get(`/api/equipment/${id}`),
     create: (data: {

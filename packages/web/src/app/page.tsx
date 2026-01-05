@@ -17,6 +17,7 @@ import {
     Loader,
     Center,
 } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import {
     IconPlus,
@@ -69,6 +70,7 @@ export default function HomePage() {
     const router = useRouter();
 
     const [search, setSearch] = useState('');
+    const [debouncedSearch] = useDebouncedValue(search, 500);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [departmentFilter, setDepartmentFilter] = useState<string | null>(null);
     const [brandFilter, setBrandFilter] = useState<string | null>(null);
@@ -79,7 +81,13 @@ export default function HomePage() {
     const [qrModalOpen, setQrModalOpen] = useState(false);
     const [qrEquipment, setQrEquipment] = useState<Equipment | null>(null);
 
-    const { data: equipment = [], isLoading: equipmentLoading } = useGetEquipmentQuery();
+    const { data: equipment = [], isLoading: equipmentLoading } = useGetEquipmentQuery({
+        search: debouncedSearch,
+        status: statusFilter || undefined,
+        department_id: departmentFilter ? Number(departmentFilter) : undefined,
+        brand_id: brandFilter ? Number(brandFilter) : undefined,
+    });
+
     const { data: brands = [] } = useGetBrandsQuery();
     const { data: departments = [] } = useGetDepartmentsQuery();
     const deleteMutation = useDeleteEquipmentMutation();
@@ -119,15 +127,8 @@ export default function HomePage() {
         setQrModalOpen(true);
     };
 
-    const filteredEquipment = equipment.filter((item: Equipment) => {
-        const matchesSearch =
-            item.name.toLowerCase().includes(search.toLowerCase()) ||
-            (item.brand_name || item.brand || '').toLowerCase().includes(search.toLowerCase());
-        const matchesStatus = !statusFilter || item.status === statusFilter;
-        const matchesDept = !departmentFilter || item.department_id === Number(departmentFilter);
-        const matchesBrand = !brandFilter || item.brand_id === Number(brandFilter);
-        return matchesSearch && matchesStatus && matchesDept && matchesBrand;
-    });
+    // Client-side filtering removed, using API results directly
+    const filteredEquipment = equipment;
 
     if (authLoading || !user) {
         return (
