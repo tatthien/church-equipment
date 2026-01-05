@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { Modal, TextInput, Select, Button, Stack } from '@mantine/core';
+import { Drawer, TextInput, Select, Button, Stack } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
@@ -22,7 +22,7 @@ interface Equipment {
     department_id: number | null;
 }
 
-interface EquipmentModalProps {
+interface EquipmentDrawerProps {
     opened: boolean;
     onClose: () => void;
     equipment: Equipment | null;
@@ -36,11 +36,11 @@ const statusOptions = [
     { value: 'disposed', label: 'Thanh lý' },
 ];
 
-export default function EquipmentModal({
+export default function EquipmentDrawer({
     opened,
     onClose,
     equipment,
-}: EquipmentModalProps) {
+}: EquipmentDrawerProps) {
     const isEditing = !!equipment;
     const { data: brands = [] } = useGetBrandsQuery();
     const { data: departments = [] } = useGetDepartmentsQuery();
@@ -124,10 +124,11 @@ export default function EquipmentModal({
     const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
     return (
-        <Modal
+        <Drawer
             opened={opened}
             onClose={onClose}
             title={isEditing ? 'Chỉnh sửa thiết bị' : 'Thêm thiết bị mới'}
+            position="right"
             size="md"
         >
             <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -175,6 +176,6 @@ export default function EquipmentModal({
                     </Button>
                 </Stack>
             </form>
-        </Modal>
+        </Drawer>
     );
 }

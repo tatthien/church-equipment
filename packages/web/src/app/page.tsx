@@ -28,7 +28,7 @@ import {
     IconDotsVertical,
 } from '@tabler/icons-react';
 import { useAuth } from '@/lib/auth';
-import EquipmentModal from '@/components/EquipmentModal';
+import EquipmentDrawer from '@/components/EquipmentDrawer';
 import QRCodeModal from '@/components/QRCodeModal';
 import AppLayout from '@/components/AppLayout';
 import { useGetEquipmentQuery, useDeleteEquipmentMutation } from '@/hooks/useEquipment';
@@ -277,7 +277,7 @@ export default function HomePage() {
             </Paper>
 
             {/* Modals */}
-            <EquipmentModal
+            <EquipmentDrawer
                 opened={equipmentModalOpen}
                 onClose={() => {
                     setEquipmentModalOpen(false);
