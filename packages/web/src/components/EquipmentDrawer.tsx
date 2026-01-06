@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { Drawer, TextInput, Select, Button, Stack } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
-import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
+import { useEffect } from 'react'
+import { Drawer, TextInput, Select, Button, Stack } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
+import { useForm } from '@mantine/form'
+import { notifications } from '@mantine/notifications'
 import {
   useCreateEquipmentMutation,
   useUpdateEquipmentMutation,
-} from '@/hooks/useEquipment';
-import { zod4Resolver } from 'mantine-form-zod-resolver';
-import { equipmentSchema } from '@/lib/schemas';
-import { BrandSelect } from './BrandSelect';
-import { DepartmentSelect } from './DepartmentSelect';
-import { EquipmentResponse } from '@/types/schemas';
+} from '@/hooks/useEquipment'
+import { zod4Resolver } from 'mantine-form-zod-resolver'
+import { equipmentSchema } from '@/lib/schemas'
+import { BrandSelect } from './BrandSelect'
+import { DepartmentSelect } from './DepartmentSelect'
+import { EquipmentResponse } from '@/types/schemas'
 
 interface EquipmentDrawerProps {
   opened: boolean;
@@ -27,17 +27,17 @@ const statusOptions = [
   { value: 'damaged', label: 'Hư hỏng' },
   { value: 'repairing', label: 'Đang sửa' },
   { value: 'disposed', label: 'Thanh lý' },
-];
+]
 
 export default function EquipmentDrawer({
   opened,
   onClose,
   equipment,
 }: EquipmentDrawerProps) {
-  const isEditing = !!equipment;
+  const isEditing = !!equipment
 
-  const createMutation = useCreateEquipmentMutation();
-  const updateMutation = useUpdateEquipmentMutation();
+  const createMutation = useCreateEquipmentMutation()
+  const updateMutation = useUpdateEquipmentMutation()
 
   const form = useForm({
     initialValues: {
@@ -48,7 +48,7 @@ export default function EquipmentDrawer({
       departmentId: '',
     },
     validate: zod4Resolver(equipmentSchema),
-  });
+  })
 
   useEffect(() => {
     if (opened) {
@@ -59,12 +59,12 @@ export default function EquipmentDrawer({
           purchaseDate: equipment.purchaseDate ? new Date(equipment.purchaseDate) : null,
           status: equipment.status,
           departmentId: equipment.departmentId ? equipment.departmentId : '',
-        });
+        })
       } else {
-        form.reset();
+        form.reset()
       }
     }
-  }, [opened, equipment]);
+  }, [opened, equipment])
 
   const handleSubmit = async (values: typeof form.values) => {
     try {
@@ -74,35 +74,35 @@ export default function EquipmentDrawer({
         purchaseDate: values.purchaseDate?.toISOString(),
         status: values.status as any,
         departmentId: values.departmentId ? values.departmentId : undefined,
-      };
+      }
 
       if (isEditing && equipment) {
-        await updateMutation.mutateAsync({ id: equipment.id, data });
+        await updateMutation.mutateAsync({ id: equipment.id, data })
         notifications.show({
           title: 'Thành công',
           message: 'Đã cập nhật thiết bị',
           color: 'green',
-        });
+        })
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync(data)
         notifications.show({
           title: 'Thành công',
           message: 'Đã thêm thiết bị mới',
           color: 'green',
-        });
+        })
       }
 
-      onClose();
+      onClose()
     } catch (error: any) {
       notifications.show({
         title: 'Lỗi',
         message: error.response?.data?.error || 'Có lỗi xảy ra',
         color: 'red',
-      });
+      })
     }
-  };
+  }
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const isSubmitting = createMutation.isPending || updateMutation.isPending
 
   return (
     <Drawer
@@ -156,5 +156,5 @@ export default function EquipmentDrawer({
         </Stack>
       </form>
     </Drawer>
-  );
+  )
 }

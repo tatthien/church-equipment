@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Table,
   Button,
@@ -16,9 +16,9 @@ import {
   Stack,
   Loader,
   Center,
-} from '@mantine/core';
-import { useDebouncedValue } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
+} from '@mantine/core'
+import { useDebouncedValue } from '@mantine/hooks'
+import { notifications } from '@mantine/notifications'
 import {
   IconPlus,
   IconEdit,
@@ -26,17 +26,17 @@ import {
   IconQrcode,
   IconSearch,
   IconDotsVertical,
-} from '@tabler/icons-react';
-import { useAuth } from '@/lib/auth';
-import EquipmentDrawer from '@/components/EquipmentDrawer';
-import QRCodeModal from '@/components/QRCodeModal';
-import AppLayout from '@/components/AppLayout';
-import { useGetEquipmentQuery, useDeleteEquipmentMutation } from '@/hooks/useEquipment';
-import { useGetBrandsQuery } from '@/hooks/useBrands';
-import { useGetDepartmentsQuery } from '@/hooks/useDepartments';
-import DataPagination from '@/components/DataPagination';
+} from '@tabler/icons-react'
+import { useAuth } from '@/lib/auth'
+import EquipmentDrawer from '@/components/EquipmentDrawer'
+import QRCodeModal from '@/components/QRCodeModal'
+import AppLayout from '@/components/AppLayout'
+import { useGetEquipmentQuery, useDeleteEquipmentMutation } from '@/hooks/useEquipment'
+import { useGetBrandsQuery } from '@/hooks/useBrands'
+import { useGetDepartmentsQuery } from '@/hooks/useDepartments'
+import DataPagination from '@/components/DataPagination'
 
-import { EquipmentResponse } from '@/types/schemas';
+import { EquipmentResponse } from '@/types/schemas'
 
 const statusColors: Record<string, string> = {
   new: 'green',
@@ -44,7 +44,7 @@ const statusColors: Record<string, string> = {
   damaged: 'red',
   repairing: 'orange',
   disposed: 'gray',
-};
+}
 
 const statusLabels: Record<string, string> = {
   new: 'Mới',
@@ -52,24 +52,24 @@ const statusLabels: Record<string, string> = {
   damaged: 'Hư hỏng',
   repairing: 'Đang sửa',
   disposed: 'Thanh lý',
-};
+}
 
 export default function HomePage() {
-  const { user, isLoading: authLoading } = useAuth();
-  const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth()
+  const router = useRouter()
 
-  const [search, setSearch] = useState('');
-  const [debouncedSearch] = useDebouncedValue(search, 500);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [departmentFilter, setDepartmentFilter] = useState<string | null>(null);
-  const [brandFilter, setBrandFilter] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('')
+  const [debouncedSearch] = useDebouncedValue(search, 500)
+  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [departmentFilter, setDepartmentFilter] = useState<string | null>(null)
+  const [brandFilter, setBrandFilter] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
 
   // Modal states
-  const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
-  const [editingEquipment, setEditingEquipment] = useState<EquipmentResponse | null>(null);
-  const [qrModalOpen, setQrModalOpen] = useState(false);
-  const [qrEquipment, setQrEquipment] = useState<EquipmentResponse | null>(null);
+  const [equipmentModalOpen, setEquipmentModalOpen] = useState(false)
+  const [editingEquipment, setEditingEquipment] = useState<EquipmentResponse | null>(null)
+  const [qrModalOpen, setQrModalOpen] = useState(false)
+  const [qrEquipment, setQrEquipment] = useState<EquipmentResponse | null>(null)
 
   const { data: equipmentResponse, isLoading: equipmentLoading } = useGetEquipmentQuery({
     search: debouncedSearch,
@@ -78,64 +78,64 @@ export default function HomePage() {
     brandId: brandFilter ? brandFilter : undefined,
     page,
     limit: 20,
-  });
+  })
 
-  const equipment = equipmentResponse?.data || [];
-  const pagination = equipmentResponse?.pagination;
+  const equipment = equipmentResponse?.data || []
+  const pagination = equipmentResponse?.pagination
 
-  const { data: brands } = useGetBrandsQuery({ limit: 1000 });
-  const { data: departments } = useGetDepartmentsQuery({ limit: 1000 });
-  const deleteMutation = useDeleteEquipmentMutation();
+  const { data: brands } = useGetBrandsQuery({ limit: 1000 })
+  const { data: departments } = useGetDepartmentsQuery({ limit: 1000 })
+  const deleteMutation = useDeleteEquipmentMutation()
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      router.push('/login')
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa thiết bị này?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa thiết bị này?')) return
 
     try {
-      await deleteMutation.mutateAsync(id);
+      await deleteMutation.mutateAsync(id)
       notifications.show({
         title: 'Thành công',
         message: 'Đã xóa thiết bị',
         color: 'green',
-      });
+      })
     } catch (error) {
       notifications.show({
         title: 'Lỗi',
         message: 'Không thể xóa thiết bị',
         color: 'red',
-      });
+      })
     }
-  };
+  }
 
   const handleEdit = (item: EquipmentResponse) => {
-    setEditingEquipment(item);
-    setEquipmentModalOpen(true);
-  };
+    setEditingEquipment(item)
+    setEquipmentModalOpen(true)
+  }
 
   const handleQRCode = (item: EquipmentResponse) => {
-    setQrEquipment(item);
-    setQrModalOpen(true);
-  };
+    setQrEquipment(item)
+    setQrModalOpen(true)
+  }
 
   // Reset to page 1 when filters change
   useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, statusFilter, departmentFilter, brandFilter]);
+    setPage(1)
+  }, [debouncedSearch, statusFilter, departmentFilter, brandFilter])
 
   // Client-side filtering removed, using API results directly
-  const filteredEquipment = equipment;
+  const filteredEquipment = equipment
 
   if (authLoading || !user) {
     return (
       <Center h="100vh">
         <Loader size="xl" />
       </Center>
-    );
+    )
   }
 
   return (
@@ -178,8 +178,8 @@ export default function HomePage() {
           <Button
             leftSection={<IconPlus size={16} />}
             onClick={() => {
-              setEditingEquipment(null);
-              setEquipmentModalOpen(true);
+              setEditingEquipment(null)
+              setEquipmentModalOpen(true)
             }}
           >
             Thêm thiết bị
@@ -201,8 +201,8 @@ export default function HomePage() {
                 variant="light"
                 leftSection={<IconPlus size={16} />}
                 onClick={() => {
-                  setEditingEquipment(null);
-                  setEquipmentModalOpen(true);
+                  setEditingEquipment(null)
+                  setEquipmentModalOpen(true)
                 }}
               >
                 Thêm thiết bị đầu tiên
@@ -226,13 +226,13 @@ export default function HomePage() {
               {filteredEquipment.map((item) => (
                 <Table.Tr key={item.id}>
                   <Table.Td fw={500}>{item.name}</Table.Td>
-                  {/* Note: brand and department names are not directly on EquipmentResponse but might be joined? 
-                      Wait, the API code in step 143 doesn't include 'include'. 
+                  {/* Note: brand and department names are not directly on EquipmentResponse but might be joined?
+                      Wait, the API code in step 143 doesn't include 'include'.
                       BUT step 137 (public) does.
-                      The main GET /api/equipment endpoint SHOULD include them. 
+                      The main GET /api/equipment endpoint SHOULD include them.
                       Let's check `equipment.ts` route.
-                      Step 143 diff didn't show the `include` block. 
-                      I should assume relations might be missing in `EquipmentResponse` type if simplified, 
+                      Step 143 diff didn't show the `include` block.
+                      I should assume relations might be missing in `EquipmentResponse` type if simplified,
                       BUT `swagger.ts` usually defines the shape.
                       My `EquipmentResponse` in `schemas.d.ts` (Step 163) does NOT have `brand` or `department` object!
                       It only has `brandId`, `departmentId`.
@@ -303,8 +303,8 @@ export default function HomePage() {
       <EquipmentDrawer
         opened={equipmentModalOpen}
         onClose={() => {
-          setEquipmentModalOpen(false);
-          setEditingEquipment(null);
+          setEquipmentModalOpen(false)
+          setEditingEquipment(null)
         }}
         equipment={editingEquipment}
       />
@@ -312,11 +312,11 @@ export default function HomePage() {
       <QRCodeModal
         opened={qrModalOpen}
         onClose={() => {
-          setQrModalOpen(false);
-          setQrEquipment(null);
+          setQrModalOpen(false)
+          setQrEquipment(null)
         }}
         equipment={qrEquipment}
       />
     </AppLayout>
-  );
+  )
 }

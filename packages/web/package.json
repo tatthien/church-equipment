@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --fix",
     "gen:types": "openapi-typescript http://localhost:3001/api/docs/json -o src/types/schemas.d.ts --root-types --root-types-no-schema-prefix --alphabetize"
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "eslint-config-next": "^16.1.1",
     "openapi-typescript": "^7.10.1",
     "postcss": "^8.4.32",
     "postcss-preset-mantine": "^1.12.0",

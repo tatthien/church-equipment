@@ -1,17 +1,17 @@
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
-import '@mantine/dates/styles.css';
+import '@mantine/core/styles.css'
+import '@mantine/notifications/styles.css'
+import '@mantine/dates/styles.css'
 
-import { ColorSchemeScript, MantineProvider, createTheme } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
-import { AuthProvider } from '@/lib/auth';
-import QueryProvider from '@/components/QueryProvider';
-import { theme } from '@/theme';
+import { ColorSchemeScript, MantineProvider, createTheme } from '@mantine/core'
+import { Notifications } from '@mantine/notifications'
+import { AuthProvider } from '@/lib/auth'
+import QueryProvider from '@/components/QueryProvider'
+import { theme } from '@/theme'
 
 export const metadata = {
   title: 'Church Equipment Management',
   description: 'Quản lý thiết bị nhà thờ',
-};
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -32,5 +32,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </MantineProvider>
       </body>
     </html>
-  );
+  )
 }

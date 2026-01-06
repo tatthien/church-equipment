@@ -1,50 +1,50 @@
-import axios from 'axios';
+import axios from 'axios'
 import {
   LoginRequest, LoginResponse, UserResponse,
   BrandResponse, CreateBrandRequest,
   DepartmentResponse, CreateDepartmentRequest,
-  EquipmentResponse, CreateEquipmentRequest
-} from '@/types/schemas';
+  EquipmentResponse, CreateEquipmentRequest,
+} from '@/types/schemas'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-});
+})
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`
     }
   }
-  return config;
-});
+  return config
+})
 
 // Handle auth errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.location.href = '/login'
     }
-    return Promise.reject(error);
-  }
-);
+    return Promise.reject(error)
+  },
+)
 
 // Auth API
 export const authApi = {
   login: (data: LoginRequest) =>
     api.post<LoginResponse>('/api/auth/login', data),
   me: () => api.get<UserResponse>('/api/auth/me'),
-};
+}
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -65,7 +65,7 @@ export const departmentsApi = {
   update: (id: string, data: Partial<CreateDepartmentRequest>) =>
     api.put<DepartmentResponse>(`/api/departments/${id}`, data),
   delete: (id: string) => api.delete<{ message: string }>(`/api/departments/${id}`),
-};
+}
 
 // Brands API
 export const brandsApi = {
@@ -75,7 +75,7 @@ export const brandsApi = {
   update: (id: string, data: Partial<CreateBrandRequest>) =>
     api.put<BrandResponse>(`/api/brands/${id}`, data),
   delete: (id: string) => api.delete<{ message: string }>(`/api/brands/${id}`),
-};
+}
 
 // Equipment API
 export const equipmentApi = {
@@ -85,14 +85,14 @@ export const equipmentApi = {
   create: (data: CreateEquipmentRequest) => api.post<void>('/api/equipment', data),
   update: (
     id: string,
-    data: Partial<CreateEquipmentRequest>
+    data: Partial<CreateEquipmentRequest>,
   ) => api.put<void>(`/api/equipment/${id}`, data),
   delete: (id: string) => api.delete<void>(`/api/equipment/${id}`),
   getQRCode: (id: string) => api.get<{ qrCode: string }>(`/api/equipment/${id}/qrcode`),
-};
+}
 
 export const publicApi = {
   getEquipment: (id: string) => api.get<EquipmentResponse & { brand_name?: string; department_name?: string }>(`/api/public/equipment/${id}`),
-};
+}
 
-export default api;
+export default api

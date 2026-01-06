@@ -1,12 +1,12 @@
-import { Router } from 'express';
-import prisma from '../db/prisma.js';
+import { Router } from 'express'
+import prisma from '../db/prisma.js'
 
-const router = Router();
+const router = Router()
 
 // Get public equipment details
 router.get('/equipment/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     const equipment = await prisma.equipment.findUnique({
       where: { id },
       include: {
@@ -14,10 +14,10 @@ router.get('/equipment/:id', async (req, res) => {
         brand: true,
         creator: true,
       },
-    });
+    })
 
     if (!equipment) {
-      return res.status(404).json({ error: 'Equipment not found' });
+      return res.status(404).json({ error: 'Equipment not found' })
     }
 
     const mappedEquipment = {
@@ -29,13 +29,13 @@ router.get('/equipment/:id', async (req, res) => {
       purchaseDate: equipment.purchaseDate,
       createdAt: equipment.createdAt,
       // Limited fields for public view
-    };
+    }
 
-    res.json(mappedEquipment);
+    res.json(mappedEquipment)
   } catch (error) {
-    console.error('Get public equipment error:', error);
-    res.status(500).json({ error: 'Failed to get equipment' });
+    console.error('Get public equipment error:', error)
+    res.status(500).json({ error: 'Failed to get equipment' })
   }
-});
+})
 
-export default router;
+export default router

@@ -1,72 +1,72 @@
-import { Router } from 'express';
-import prisma from '../db/prisma.js';
-import { authMiddleware, AuthRequest } from '../middleware/auth.js';
-import { getPaginationParams, getSkip, paginateResults } from '../utils/pagination.js';
-import { CreateBrandSchema, UpdateBrandSchema } from '../schemas/brands.js';
+import { Router } from 'express'
+import prisma from '../db/prisma.js'
+import { authMiddleware, AuthRequest } from '../middleware/auth.js'
+import { getPaginationParams, getSkip, paginateResults } from '../utils/pagination.js'
+import { CreateBrandSchema, UpdateBrandSchema } from '../schemas/brands.js'
 
-const router = Router();
+const router = Router()
 
-router.use(authMiddleware);
+router.use(authMiddleware)
 
 // Get all brands
 router.get('/', async (req, res) => {
   try {
-    const { page, limit } = getPaginationParams(req.query);
+    const { page, limit } = getPaginationParams(req.query)
 
-    const total = await prisma.brand.count();
+    const total = await prisma.brand.count()
 
     const brands = await prisma.brand.findMany({
       orderBy: { name: 'asc' },
       skip: getSkip(page, limit),
       take: limit,
-    });
+    })
 
-    res.json(paginateResults(brands, total, page, limit));
+    res.json(paginateResults(brands, total, page, limit))
   } catch (error) {
-    console.error('Get brands error:', error);
-    res.status(500).json({ error: 'Failed to get brands' });
+    console.error('Get brands error:', error)
+    res.status(500).json({ error: 'Failed to get brands' })
   }
-});
+})
 
 // Create brand
 router.post('/', async (req: AuthRequest, res) => {
   try {
-    const result = CreateBrandSchema.safeParse(req.body);
+    const result = CreateBrandSchema.safeParse(req.body)
 
     if (!result.success) {
-      return res.status(400).json({ error: 'Invalid input', details: result.error });
+      return res.status(400).json({ error: 'Invalid input', details: result.error })
     }
 
-    const { name, description } = result.data;
+    const { name, description } = result.data
 
     const brand = await prisma.brand.create({
       data: {
         name,
         description,
       },
-    });
+    })
 
-    res.status(201).json(brand);
+    res.status(201).json(brand)
   } catch (error: any) {
     if (error.code === 'P2002') {
-      return res.status(400).json({ error: 'Brand already exists' });
+      return res.status(400).json({ error: 'Brand already exists' })
     }
-    console.error('Create brand error:', error);
-    res.status(500).json({ error: 'Failed to create brand' });
+    console.error('Create brand error:', error)
+    res.status(500).json({ error: 'Failed to create brand' })
   }
-});
+})
 
 // Update brand
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
-    const { id } = req.params;
-    const result = UpdateBrandSchema.safeParse(req.body);
+    const { id } = req.params
+    const result = UpdateBrandSchema.safeParse(req.body)
 
     if (!result.success) {
-      return res.status(400).json({ error: 'Invalid input', details: result.error });
+      return res.status(400).json({ error: 'Invalid input', details: result.error })
     }
 
-    const { name, description } = result.data;
+    const { name, description } = result.data
 
     const brand = await prisma.brand.update({
       where: { id },
@@ -74,36 +74,36 @@ router.put('/:id', async (req: AuthRequest, res) => {
         name,
         description,
       },
-    });
+    })
 
-    res.json(brand);
+    res.json(brand)
   } catch (error: any) {
     if (error.code === 'P2002') {
-      return res.status(400).json({ error: 'Brand name already exists' });
+      return res.status(400).json({ error: 'Brand name already exists' })
     }
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Brand not found' });
+      return res.status(404).json({ error: 'Brand not found' })
     }
-    console.error('Update brand error:', error);
-    res.status(500).json({ error: 'Failed to update brand' });
+    console.error('Update brand error:', error)
+    res.status(500).json({ error: 'Failed to update brand' })
   }
-});
+})
 
 // Delete brand
 router.delete('/:id', async (req: AuthRequest, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
     await prisma.brand.delete({
       where: { id },
-    });
-    res.json({ message: 'Brand deleted' });
+    })
+    res.json({ message: 'Brand deleted' })
   } catch (error: any) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Brand not found' });
+      return res.status(404).json({ error: 'Brand not found' })
     }
-    console.error('Delete brand error:', error);
-    res.status(500).json({ error: 'Failed to delete brand' });
+    console.error('Delete brand error:', error)
+    res.status(500).json({ error: 'Failed to delete brand' })
   }
-});
+})
 
-export default router;
+export default router

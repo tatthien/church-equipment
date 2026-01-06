@@ -1,0 +1,4 @@
+{
+  "packages/api/**/*.{js,ts}": "bun run --cwd packages/api lint",
+  "packages/web/**/*.{js,jsx,ts,tsx}": "bun run --cwd packages/web lint"
+}
