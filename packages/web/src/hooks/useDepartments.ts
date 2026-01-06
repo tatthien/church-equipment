@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { departmentsApi } from '@/lib/api';
+import { CreateDepartmentRequest } from '@/types/schemas';
 
 export const useGetDepartmentsQuery = (params?: { page?: number; limit?: number }) => {
     return useQuery({
@@ -15,7 +16,7 @@ export const useGetDepartmentsQuery = (params?: { page?: number; limit?: number 
 export const useCreateDepartmentMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (data: { name: string; description?: string }) => {
+        mutationFn: async (data: CreateDepartmentRequest) => {
             const { data: response } = await departmentsApi.create(data);
             return response;
         },
@@ -28,7 +29,7 @@ export const useCreateDepartmentMutation = () => {
 export const useUpdateDepartmentMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ id, data }: { id: number; data: { name?: string; description?: string } }) => {
+        mutationFn: async ({ id, data }: { id: string; data: Partial<CreateDepartmentRequest> }) => {
             const { data: response } = await departmentsApi.update(id, data);
             return response;
         },
@@ -41,7 +42,7 @@ export const useUpdateDepartmentMutation = () => {
 export const useDeleteDepartmentMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (id: number) => {
+        mutationFn: async (id: string) => {
             await departmentsApi.delete(id);
         },
         onSuccess: () => {

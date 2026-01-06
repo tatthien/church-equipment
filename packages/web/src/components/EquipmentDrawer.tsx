@@ -13,21 +13,12 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { equipmentSchema } from '@/lib/schemas';
 import { BrandSelect } from './BrandSelect';
 import { DepartmentSelect } from './DepartmentSelect';
-
-interface Equipment {
-  id: number;
-  name: string;
-  brand: any;
-  purchaseDate: string | null;
-  createdAt: string;
-  status: string;
-  department: any;
-}
+import { EquipmentResponse } from '@/types/schemas';
 
 interface EquipmentDrawerProps {
   opened: boolean;
   onClose: () => void;
-  equipment: Equipment | null;
+  equipment: EquipmentResponse | null;
 }
 
 const statusOptions = [
@@ -64,10 +55,10 @@ export default function EquipmentDrawer({
       if (equipment) {
         form.setValues({
           name: equipment.name,
-          brandId: equipment.brand ? equipment.brand.id : '',
+          brandId: equipment.brandId ? equipment.brandId : '',
           purchaseDate: equipment.purchaseDate ? new Date(equipment.purchaseDate) : null,
           status: equipment.status,
-          departmentId: equipment.department ? equipment.department.id : '',
+          departmentId: equipment.departmentId ? equipment.departmentId : '',
         });
       } else {
         form.reset();
@@ -81,11 +72,11 @@ export default function EquipmentDrawer({
         name: values.name,
         brandId: values.brandId ? values.brandId : undefined,
         purchaseDate: values.purchaseDate?.toISOString(),
-        status: values.status,
+        status: values.status as any,
         departmentId: values.departmentId ? values.departmentId : undefined,
       };
 
-      if (isEditing) {
+      if (isEditing && equipment) {
         await updateMutation.mutateAsync({ id: equipment.id, data });
         notifications.show({
           title: 'Thành công',

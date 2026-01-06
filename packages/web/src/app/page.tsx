@@ -36,16 +36,7 @@ import { useGetBrandsQuery } from '@/hooks/useBrands';
 import { useGetDepartmentsQuery } from '@/hooks/useDepartments';
 import DataPagination from '@/components/DataPagination';
 
-interface Equipment {
-  id: number;
-  name: string;
-  brand: any;
-  purchaseDate: string | null;
-  createdAt: string;
-  status: string;
-  department: any;
-  creator: any;
-}
+import { EquipmentResponse } from '@/types/schemas';
 
 const statusColors: Record<string, string> = {
   new: 'green',
@@ -76,9 +67,9 @@ export default function HomePage() {
 
   // Modal states
   const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
-  const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
+  const [editingEquipment, setEditingEquipment] = useState<EquipmentResponse | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
-  const [qrEquipment, setQrEquipment] = useState<Equipment | null>(null);
+  const [qrEquipment, setQrEquipment] = useState<EquipmentResponse | null>(null);
 
   const { data: equipmentResponse, isLoading: equipmentLoading } = useGetEquipmentQuery({
     search: debouncedSearch,
@@ -102,7 +93,7 @@ export default function HomePage() {
     }
   }, [user, authLoading, router]);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa thiết bị này?')) return;
 
     try {
@@ -121,12 +112,12 @@ export default function HomePage() {
     }
   };
 
-  const handleEdit = (item: Equipment) => {
+  const handleEdit = (item: EquipmentResponse) => {
     setEditingEquipment(item);
     setEquipmentModalOpen(true);
   };
 
-  const handleQRCode = (item: Equipment) => {
+  const handleQRCode = (item: EquipmentResponse) => {
     setQrEquipment(item);
     setQrModalOpen(true);
   };
@@ -163,7 +154,7 @@ export default function HomePage() {
             placeholder="Hãng"
             clearable
             searchable
-            data={brands?.data.map((b: any) => ({ value: String(b.id), label: b.name }))}
+            data={brands?.data.map((b) => ({ value: b.id, label: b.name }))}
             value={brandFilter}
             onChange={setBrandFilter}
             w={150}
@@ -179,7 +170,7 @@ export default function HomePage() {
           <Select
             placeholder="Bộ phận"
             clearable
-            data={departments?.data.map((d: any) => ({ value: String(d.id), label: d.name }))}
+            data={departments?.data.map((d) => ({ value: d.id, label: d.name }))}
             value={departmentFilter}
             onChange={setDepartmentFilter}
             w={150}
@@ -232,11 +223,25 @@ export default function HomePage() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {filteredEquipment.map((item: Equipment) => (
+              {filteredEquipment.map((item) => (
                 <Table.Tr key={item.id}>
                   <Table.Td fw={500}>{item.name}</Table.Td>
-                  <Table.Td>{item.brand ? item.brand.name : '-'}</Table.Td>
-                  <Table.Td>{item.department ? item.department.name : '-'}</Table.Td>
+                  {/* Note: brand and department names are not directly on EquipmentResponse but might be joined? 
+                      Wait, the API code in step 143 doesn't include 'include'. 
+                      BUT step 137 (public) does.
+                      The main GET /api/equipment endpoint SHOULD include them. 
+                      Let's check `equipment.ts` route.
+                      Step 143 diff didn't show the `include` block. 
+                      I should assume relations might be missing in `EquipmentResponse` type if simplified, 
+                      BUT `swagger.ts` usually defines the shape.
+                      My `EquipmentResponse` in `schemas.d.ts` (Step 163) does NOT have `brand` or `department` object!
+                      It only has `brandId`, `departmentId`.
+                      Wait, checking `view_file routes/equipment.ts` (Step 114) might clarify if it includes relations.
+                      If it doesn't return relations, the UI will break names.
+                      I need to check `src/routes/equipment.ts`.
+                   */}
+                  <Table.Td>{item.brand?.name || '-'}</Table.Td>
+                  <Table.Td>{item.department?.name || '-'}</Table.Td>
                   <Table.Td>
                     <Badge color={statusColors[item.status] || 'gray'}>
                       {statusLabels[item.status] || item.status}
@@ -247,7 +252,7 @@ export default function HomePage() {
                       ? new Date(item.purchaseDate).toLocaleDateString('vi-VN')
                       : '-'}
                   </Table.Td>
-                  <Table.Td>{item.creator.name || '-'}</Table.Td>
+                  <Table.Td>{item.creator?.name || '-'}</Table.Td>
                   <Table.Td>
                     <Menu shadow="md" width={150}>
                       <Menu.Target>

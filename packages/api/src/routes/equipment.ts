@@ -3,6 +3,7 @@ import prisma from '../db/prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { generateQRCode } from '../services/qrcode.js';
 import { getPaginationParams, getSkip, paginateResults } from '../utils/pagination.js';
+import { CreateEquipmentSchema, UpdateEquipmentSchema } from '../schemas/equipment.js';
 
 const router = Router();
 
@@ -93,24 +94,25 @@ router.get('/:id', async (req: AuthRequest, res) => {
 // Create equipment
 router.post('/', async (req: AuthRequest, res) => {
   try {
-    const { name, brandId, purchaseDate, status, departmentId } = req.body;
+    const result = CreateEquipmentSchema.safeParse(req.body);
 
-    if (!name) {
-      return res.status(400).json({ error: 'Name is required' });
+    if (!result.success) {
+      return res.status(400).json({ error: 'Invalid input', details: result.error });
     }
 
-    const validStatuses = ['new', 'old', 'damaged', 'repairing', 'disposed'];
-    if (status && !validStatuses.includes(status)) {
-      return res.status(400).json({ error: 'Invalid status' });
-    }
+    const { name, brandId, purchaseDate, status, departmentId } = result.data;
+
+    // purchaseDate is string from schema, Prisma expects Date object or ISO string.
+    // If it's a valid ISO string, Prisma handles it, or we manually convert if needed.
+    // Zod schema defines check for datetime format but keeps it as string.
 
     await prisma.equipment.create({
       data: {
         name,
-        brandId: brandId ? brandId : null,
-        purchaseDate: purchaseDate || null,
-        status: status || 'new',
-        departmentId: departmentId ? departmentId : null,
+        brandId,
+        purchaseDate,
+        status: status as any, // Enum type cast if needed
+        departmentId,
         createdBy: req.user?.id || null,
       },
     });
@@ -126,7 +128,13 @@ router.post('/', async (req: AuthRequest, res) => {
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { name, brandId, purchaseDate, status, departmentId } = req.body;
+    const result = UpdateEquipmentSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({ error: 'Invalid input', details: result.error });
+    }
+
+    const { name, brandId, purchaseDate, status, departmentId } = result.data;
 
     const existing = await prisma.equipment.findUnique({ where: { id } });
     if (!existing) {
@@ -138,19 +146,14 @@ router.put('/:id', async (req: AuthRequest, res) => {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const validStatuses = ['new', 'old', 'damaged', 'repairing', 'disposed'];
-    if (status && !validStatuses.includes(status)) {
-      return res.status(400).json({ error: 'Invalid status' });
-    }
-
     await prisma.equipment.update({
       where: { id },
       data: {
         name,
-        brandId: brandId !== undefined ? (brandId ? brandId : null) : undefined,
-        purchaseDate: purchaseDate,
-        status,
-        departmentId: departmentId !== undefined ? (departmentId ? departmentId : null) : undefined,
+        brandId,
+        purchaseDate,
+        status: status as any,
+        departmentId,
       },
     });
 

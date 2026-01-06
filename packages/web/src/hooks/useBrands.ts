@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { brandsApi } from '@/lib/api';
+import { CreateBrandRequest } from '@/types/schemas';
 
 export const useGetBrandsQuery = (params?: { page?: number; limit?: number }) => {
     return useQuery({
@@ -14,7 +15,7 @@ export const useGetBrandsQuery = (params?: { page?: number; limit?: number }) =>
 export const useCreateBrandMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (data: { name: string; description?: string }) => {
+        mutationFn: async (data: CreateBrandRequest) => {
             const { data: response } = await brandsApi.create(data);
             return response;
         },
@@ -27,7 +28,7 @@ export const useCreateBrandMutation = () => {
 export const useUpdateBrandMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ id, data }: { id: number; data: { name?: string; description?: string } }) => {
+        mutationFn: async ({ id, data }: { id: string; data: Partial<CreateBrandRequest> }) => {
             const { data: response } = await brandsApi.update(id, data);
             return response;
         },
@@ -40,7 +41,7 @@ export const useUpdateBrandMutation = () => {
 export const useDeleteBrandMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (id: number) => {
+        mutationFn: async (id: string) => {
             await brandsApi.delete(id);
         },
         onSuccess: () => {

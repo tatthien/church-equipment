@@ -5,18 +5,12 @@ import { Modal, Stack, Text, Image, Button, Group, Center, Loader } from '@manti
 import { IconDownload, IconShare } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { equipmentApi } from '@/lib/api';
-
-interface Equipment {
-  id: string;
-  name: string;
-  brand: any | null;
-  department: any | null
-}
+import { EquipmentResponse } from '@/types/schemas';
 
 interface QRCodeModalProps {
   opened: boolean;
   onClose: () => void;
-  equipment: Equipment | null;
+  equipment: EquipmentResponse | null;
 }
 
 export default function QRCodeModal({ opened, onClose, equipment }: QRCodeModalProps) {

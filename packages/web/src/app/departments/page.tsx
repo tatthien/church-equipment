@@ -37,19 +37,14 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { departmentSchema } from '@/lib/schemas';
 import DataPagination from '@/components/DataPagination';
 
-interface Department {
-    id: number;
-    name: string;
-    description: string | null;
-    createdAt: string;
-}
+import { DepartmentResponse, CreateDepartmentRequest } from '@/types/schemas';
 
 export default function DepartmentsPage() {
     const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [editingDept, setEditingDept] = useState<Department | null>(null);
+    const [editingDept, setEditingDept] = useState<DepartmentResponse | null>(null);
     const [page, setPage] = useState(1);
 
     const { data: departmentsResponse, isLoading } = useGetDepartmentsQuery({ page, limit: 20 });
@@ -73,7 +68,7 @@ export default function DepartmentsPage() {
         }
     }, [user, authLoading, router]);
 
-    const handleOpenModal = (dept: Department | null = null) => {
+    const handleOpenModal = (dept: DepartmentResponse | null = null) => {
         if (dept) {
             form.setValues({
                 name: dept.name,
@@ -114,7 +109,7 @@ export default function DepartmentsPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         if (!confirm('Bạn có chắc chắn muốn xóa bộ phận này?')) return;
 
         try {
@@ -188,12 +183,12 @@ export default function DepartmentsPage() {
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
-                            {departments.map((dept: Department) => (
+                            {departments.map((dept) => (
                                 <Table.Tr key={dept.id}>
                                     <Table.Td fw={500}>{dept.name}</Table.Td>
                                     <Table.Td>{dept.description || '-'}</Table.Td>
                                     <Table.Td>
-                                        {new Date(dept.createdAt).toLocaleDateString('vi-VN')}
+                                        {dept.createdAt ? new Date(dept.createdAt).toLocaleDateString('vi-VN') : '-'}
                                     </Table.Td>
                                     <Table.Td>
                                         <Group gap="xs">

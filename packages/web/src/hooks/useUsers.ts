@@ -40,7 +40,7 @@ export const useUpdateUserMutation = () => {
     const { token } = useAuth();
 
     return useMutation({
-        mutationFn: async ({ id, data }: { id: number; data: any }) => {
+        mutationFn: async ({ id, data }: { id: string; data: any }) => {
             const { data: response } = await axios.put(`${API_URL}/users/${id}`, data, {
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -57,7 +57,7 @@ export const useDeleteUserMutation = () => {
     const { token } = useAuth();
 
     return useMutation({
-        mutationFn: async (id: number) => {
+        mutationFn: async (id: string) => {
             await axios.delete(`${API_URL}/users/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });

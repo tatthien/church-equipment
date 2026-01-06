@@ -37,19 +37,14 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { brandSchema } from '@/lib/schemas';
 import DataPagination from '@/components/DataPagination';
 
-interface Brand {
-    id: number;
-    name: string;
-    description: string | null;
-    createdAt: string;
-}
+import { BrandResponse, CreateBrandRequest } from '@/types/schemas';
 
 export default function BrandsPage() {
     const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+    const [editingBrand, setEditingBrand] = useState<BrandResponse | null>(null);
     const [page, setPage] = useState(1);
 
     const { data: brandsResponse, isLoading } = useGetBrandsQuery({ page, limit: 20 });
@@ -74,7 +69,7 @@ export default function BrandsPage() {
         }
     }, [user, authLoading, router]);
 
-    const handleOpenModal = (brand: Brand | null = null) => {
+    const handleOpenModal = (brand: BrandResponse | null = null) => {
         if (brand) {
             form.setValues({
                 name: brand.name,
@@ -115,7 +110,7 @@ export default function BrandsPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         if (!confirm('Bạn có chắc chắn muốn xóa hãng này?')) return;
 
         try {
@@ -189,12 +184,12 @@ export default function BrandsPage() {
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
-                            {brands.map((brand: Brand) => (
+                            {brands.map((brand) => (
                                 <Table.Tr key={brand.id}>
                                     <Table.Td fw={500}>{brand.name}</Table.Td>
                                     <Table.Td>{brand.description || '-'}</Table.Td>
                                     <Table.Td>
-                                        {new Date(brand.createdAt).toLocaleDateString('vi-VN')}
+                                        {brand.createdAt ? new Date(brand.createdAt).toLocaleDateString('vi-VN') : '-'}
                                     </Table.Td>
                                     <Table.Td>
                                         <Group gap="xs">

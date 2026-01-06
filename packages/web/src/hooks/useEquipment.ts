@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { equipmentApi } from '@/lib/api';
+import { CreateEquipmentRequest } from '@/types/schemas';
 
 export const useGetEquipmentQuery = (params?: {
   status?: string;
-  departmentId?: number;
-  brandId?: number;
+  departmentId?: string;
+  brandId?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -18,7 +19,7 @@ export const useGetEquipmentQuery = (params?: {
   });
 };
 
-export const useGetEquipmentByIdQuery = (id: number) => {
+export const useGetEquipmentByIdQuery = (id: string) => {
   return useQuery({
     queryKey: ['equipment', id],
     queryFn: async () => {
@@ -32,13 +33,7 @@ export const useGetEquipmentByIdQuery = (id: number) => {
 export const useCreateEquipmentMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: {
-      name: string;
-      brand_id?: number | null;
-      purchase_date?: string;
-      status?: string;
-      department_id?: number;
-    }) => {
+    mutationFn: async (data: CreateEquipmentRequest) => {
       const { data: response } = await equipmentApi.create(data);
       return response;
     },
@@ -55,14 +50,8 @@ export const useUpdateEquipmentMutation = () => {
       id,
       data,
     }: {
-      id: number;
-      data: {
-        name?: string;
-        brandId?: string | null;
-        purchaseDate?: string;
-        status?: string;
-        departmentId?: string | null;
-      };
+      id: string;
+      data: Partial<CreateEquipmentRequest>;
     }) => {
       const { data: response } = await equipmentApi.update(id, data);
       return response;
@@ -76,7 +65,7 @@ export const useUpdateEquipmentMutation = () => {
 export const useDeleteEquipmentMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await equipmentApi.delete(id);
     },
     onSuccess: () => {

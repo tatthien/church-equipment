@@ -7,7 +7,7 @@ type Props = SelectProps
 export function BrandSelect({ ...props }: Props) {
   const { data: brands } = useGetBrandsQuery({ limit: 1000 });
   const brandOptions = useMemo(() => {
-    return brands?.data.map((b: any) => ({ value: b.id, label: b.name }));
+    return brands?.data.map((b) => ({ value: b.id, label: b.name }));
   }, [brands]);
   return (
     <Select

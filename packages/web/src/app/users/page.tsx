@@ -37,25 +37,20 @@ import {
     useDeleteUserMutation,
 } from '@/hooks/useUsers';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { UserResponse } from '@/types/schemas';
 import { userCreateSchema, userUpdateSchema } from '@/lib/schemas';
-
-interface User {
-    id: number;
-    username: string;
-    name: string;
-    role: string;
-    createdAt: string;
-}
 
 export default function UsersPage() {
     const { user, isLoading: authLoading } = useAuth();
     const router = useRouter();
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [editingUser, setEditingUser] = useState<UserResponse | null>(null);
     const [search, setSearch] = useState('');
 
-    const { data: users = [], isLoading } = useGetUsersQuery();
+    const { data: usersResponse, isLoading } = useGetUsersQuery();
+    const users: UserResponse[] = usersResponse || [];
+
     const createMutation = useCreateUserMutation();
     const updateMutation = useUpdateUserMutation();
     const deleteMutation = useDeleteUserMutation();
@@ -87,7 +82,7 @@ export default function UsersPage() {
         }
     }, [user, authLoading, router]);
 
-    const handleOpenModal = (user: User | null = null) => {
+    const handleOpenModal = (user: UserResponse | null = null) => {
         if (user) {
             form.setValues({
                 username: user.username,
@@ -134,7 +129,7 @@ export default function UsersPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) return;
 
         try {
@@ -153,7 +148,7 @@ export default function UsersPage() {
         }
     };
 
-    const filteredUsers = users.filter((u: User) =>
+    const filteredUsers = users.filter((u) =>
         u.name.toLowerCase().includes(search.toLowerCase()) ||
         u.username.toLowerCase().includes(search.toLowerCase())
     );
@@ -209,7 +204,7 @@ export default function UsersPage() {
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
-                            {filteredUsers.map((u: User) => (
+                            {filteredUsers.map((u) => (
                                 <Table.Tr key={u.id}>
                                     <Table.Td fw={500}>{u.username}</Table.Td>
                                     <Table.Td>{u.name}</Table.Td>
@@ -219,7 +214,7 @@ export default function UsersPage() {
                                         </Badge>
                                     </Table.Td>
                                     <Table.Td>
-                                        {new Date(u.createdAt).toLocaleDateString('vi-VN')}
+                                        {(u as any).createdAt ? new Date((u as any).createdAt).toLocaleDateString('vi-VN') : '-'}
                                     </Table.Td>
                                     <Table.Td>
                                         <Group gap="xs">

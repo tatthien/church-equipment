@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../db/prisma.js';
 import { generateToken, authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { LoginRequestSchema } from '../schemas/auth.js';
 
 const router = Router();
 
@@ -11,11 +12,13 @@ const router = Router();
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const result = LoginRequestSchema.safeParse(req.body);
 
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
+    if (!result.success) {
+      return res.status(400).json({ error: 'Invalid input', details: result.error });
     }
+
+    const { username, password } = result.data;
 
     // Find user
     const user = await prisma.user.findUnique({ where: { username } });

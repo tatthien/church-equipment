@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../db/prisma.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { CreateUserSchema, UpdateUserSchema } from '../schemas/auth.js';
 
 const router = Router();
 
@@ -39,11 +40,13 @@ router.get('/', async (req, res) => {
 // Create user
 router.post('/', async (req, res) => {
   try {
-    const { username, password, name, role } = req.body;
+    const result = CreateUserSchema.safeParse(req.body);
 
-    if (!username || !password || !name) {
-      return res.status(400).json({ error: 'Username, password and name are required' });
+    if (!result.success) {
+      return res.status(400).json({ error: 'Invalid input', details: result.error });
     }
+
+    const { username, password, name, role } = result.data;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -52,7 +55,7 @@ router.post('/', async (req, res) => {
         username,
         password: hashedPassword,
         name,
-        role: role || 'user',
+        role: role as any || 'user',
       },
       select: {
         id: true,
@@ -77,7 +80,13 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, role, password } = req.body;
+    const result = UpdateUserSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({ error: 'Invalid input', details: result.error });
+    }
+
+    const { name, role, password } = result.data;
 
     const data: any = { name, role };
     if (password) {

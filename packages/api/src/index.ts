@@ -31,9 +31,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Swagger
+import swaggerUi from 'swagger-ui-express';
+import { generateOpenAPI } from './lib/swagger.js';
+
+app.get('/api/docs/json', (req, res) => {
+  res.json(generateOpenAPI());
+});
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(generateOpenAPI()));
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 API server running at http://localhost:${PORT}`);
+  console.log(`📚 Swagger docs available at http://localhost:${PORT}/api/docs`);
 });
 
 export default app;

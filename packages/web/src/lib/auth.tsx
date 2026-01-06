@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authApi } from './api';
 
 interface User {
-    id: number;
+    id: string;
     username: string;
     name: string;
     role: string;
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = async (username: string, password: string) => {
-        const response = await authApi.login(username, password);
+        const response = await authApi.login({ username, password });
         const { user: userData, token: authToken } = response.data;
 
         setUser(userData);
