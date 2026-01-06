@@ -40,7 +40,7 @@ router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const department = await prisma.department.findUnique({
-            where: { id: Number(id) },
+            where: { id },
         });
 
         if (!department) {
@@ -87,7 +87,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
         const { name, description } = req.body;
 
         const department = await prisma.department.update({
-            where: { id: Number(id) },
+            where: { id },
             data: {
                 name,
                 description,
@@ -113,7 +113,7 @@ router.delete('/:id', async (req, res) => {
         const { id } = req.params;
 
         await prisma.department.delete({
-            where: { id: Number(id) },
+            where: { id },
         });
         res.json({ message: 'Department deleted' });
     } catch (error: any) {

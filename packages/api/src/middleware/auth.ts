@@ -4,39 +4,39 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'church-equipment-secret-key-2024';
 
 export interface AuthRequest extends Request {
-    user?: {
-        id: number;
-        username: string;
-        name: string;
-        role: string;
-    };
+  user?: {
+    id: string;
+    username: string;
+    name: string;
+    role: string;
+  };
 }
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized: No token provided' });
-    }
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: No token provided' });
+  }
 
-    const token = authHeader.split(' ')[1];
+  const token = authHeader.split(' ')[1];
 
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET) as {
-            id: number;
-            username: string;
-            name: string;
-            role: string;
-        };
-        req.user = decoded;
-        next();
-    } catch (error) {
-        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
-    }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      id: string;
+      username: string;
+      name: string;
+      role: string;
+    };
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+  }
 };
 
-export const generateToken = (user: { id: number; username: string; name: string; role: string }) => {
-    return jwt.sign(user, JWT_SECRET, { expiresIn: '7d' });
+export const generateToken = (user: { id: string; username: string; name: string; role: string }) => {
+  return jwt.sign(user, JWT_SECRET, { expiresIn: '7d' });
 };
 
 export { JWT_SECRET };

@@ -1,183 +1,169 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { Drawer, TextInput, Select, Button, Stack } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import {
-    useCreateEquipmentMutation,
-    useUpdateEquipmentMutation,
+  useCreateEquipmentMutation,
+  useUpdateEquipmentMutation,
 } from '@/hooks/useEquipment';
-import { useGetBrandsQuery } from '@/hooks/useBrands';
-import { useGetDepartmentsQuery } from '@/hooks/useDepartments';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { equipmentSchema } from '@/lib/schemas';
+import { BrandSelect } from './BrandSelect';
+import { DepartmentSelect } from './DepartmentSelect';
 
 interface Equipment {
-    id: number;
-    name: string;
-    brand: string | null;
-    brand_id: number | null;
-    purchaseDate: string | null;
-    status: string;
-    department_id: number | null;
+  id: number;
+  name: string;
+  brand: any;
+  purchaseDate: string | null;
+  createdAt: string;
+  status: string;
+  department: any;
 }
 
 interface EquipmentDrawerProps {
-    opened: boolean;
-    onClose: () => void;
-    equipment: Equipment | null;
+  opened: boolean;
+  onClose: () => void;
+  equipment: Equipment | null;
 }
 
 const statusOptions = [
-    { value: 'new', label: 'Mới' },
-    { value: 'old', label: 'Cũ' },
-    { value: 'damaged', label: 'Hư hỏng' },
-    { value: 'repairing', label: 'Đang sửa' },
-    { value: 'disposed', label: 'Thanh lý' },
+  { value: 'new', label: 'Mới' },
+  { value: 'old', label: 'Cũ' },
+  { value: 'damaged', label: 'Hư hỏng' },
+  { value: 'repairing', label: 'Đang sửa' },
+  { value: 'disposed', label: 'Thanh lý' },
 ];
 
 export default function EquipmentDrawer({
-    opened,
-    onClose,
-    equipment,
+  opened,
+  onClose,
+  equipment,
 }: EquipmentDrawerProps) {
-    const isEditing = !!equipment;
-    const { data: brands } = useGetBrandsQuery({ limit: 1000 });
-    const { data: departments } = useGetDepartmentsQuery({ limit: 1000 });
+  const isEditing = !!equipment;
 
-    const createMutation = useCreateEquipmentMutation();
-    const updateMutation = useUpdateEquipmentMutation();
+  const createMutation = useCreateEquipmentMutation();
+  const updateMutation = useUpdateEquipmentMutation();
 
-    // ...
+  const form = useForm({
+    initialValues: {
+      name: '',
+      brandId: '',
+      purchaseDate: null as Date | null,
+      status: 'new',
+      departmentId: '',
+    },
+    validate: zod4Resolver(equipmentSchema),
+  });
 
-    const form = useForm({
-        initialValues: {
-            name: '',
-            brand_id: '',
-            purchase_date: null as Date | null,
-            status: 'new',
-            department_id: '',
-        },
-        validate: zod4Resolver(equipmentSchema),
-    });
+  useEffect(() => {
+    if (opened) {
+      if (equipment) {
+        form.setValues({
+          name: equipment.name,
+          brandId: equipment.brand ? equipment.brand.id : '',
+          purchaseDate: equipment.purchaseDate ? new Date(equipment.purchaseDate) : null,
+          status: equipment.status,
+          departmentId: equipment.department ? equipment.department.id : '',
+        });
+      } else {
+        form.reset();
+      }
+    }
+  }, [opened, equipment]);
 
-    useEffect(() => {
-        if (opened) {
-            if (equipment) {
-                form.setValues({
-                    name: equipment.name,
-                    brand_id: equipment.brand_id ? String(equipment.brand_id) : '',
-                    purchase_date: equipment.purchaseDate ? new Date(equipment.purchaseDate) : null,
-                    status: equipment.status,
-                    department_id: equipment.department_id ? String(equipment.department_id) : '',
-                });
-            } else {
-                form.reset();
-            }
-        }
-    }, [opened, equipment]);
+  const handleSubmit = async (values: typeof form.values) => {
+    try {
+      const data = {
+        name: values.name,
+        brandId: values.brandId ? values.brandId : undefined,
+        purchaseDate: values.purchaseDate?.toISOString(),
+        status: values.status,
+        departmentId: values.departmentId ? values.departmentId : undefined,
+      };
 
-    const brandOptions = useMemo(() => {
-        return brands?.data.map((b: any) => ({ value: String(b.id), label: b.name }));
-    }, [brands]);
+      if (isEditing) {
+        await updateMutation.mutateAsync({ id: equipment.id, data });
+        notifications.show({
+          title: 'Thành công',
+          message: 'Đã cập nhật thiết bị',
+          color: 'green',
+        });
+      } else {
+        await createMutation.mutateAsync(data);
+        notifications.show({
+          title: 'Thành công',
+          message: 'Đã thêm thiết bị mới',
+          color: 'green',
+        });
+      }
 
-    const departmentOptions = useMemo(() => {
-        return departments?.data.map((d: any) => ({ value: String(d.id), label: d.name }));
-    }, [departments]);
+      onClose();
+    } catch (error: any) {
+      notifications.show({
+        title: 'Lỗi',
+        message: error.response?.data?.error || 'Có lỗi xảy ra',
+        color: 'red',
+      });
+    }
+  };
 
-    const handleSubmit = async (values: typeof form.values) => {
-        try {
-            const data = {
-                name: values.name,
-                brand_id: values.brand_id ? Number(values.brand_id) : undefined,
-                purchase_date: values.purchase_date?.toISOString().split('T')[0],
-                status: values.status,
-                department_id: values.department_id ? Number(values.department_id) : undefined,
-            };
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-            if (isEditing) {
-                await updateMutation.mutateAsync({ id: equipment.id, data });
-                notifications.show({
-                    title: 'Thành công',
-                    message: 'Đã cập nhật thiết bị',
-                    color: 'green',
-                });
-            } else {
-                await createMutation.mutateAsync(data);
-                notifications.show({
-                    title: 'Thành công',
-                    message: 'Đã thêm thiết bị mới',
-                    color: 'green',
-                });
-            }
+  return (
+    <Drawer
+      opened={opened}
+      onClose={onClose}
+      title={isEditing ? 'Chỉnh sửa thiết bị' : 'Thêm thiết bị mới'}
+      position="right"
+      size="md"
+    >
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Stack gap="md">
+          <TextInput
+            label="Tên thiết bị"
+            placeholder="VD: Microphone SM58"
+            withAsterisk
+            {...form.getInputProps('name')}
+          />
 
-            onClose();
-        } catch (error: any) {
-            notifications.show({
-                title: 'Lỗi',
-                message: error.response?.data?.error || 'Có lỗi xảy ra',
-                color: 'red',
-            });
-        }
-    };
+          <BrandSelect
+            label="Hãng sản xuất"
+            placeholder="Chọn hãng"
+            searchable
+            clearable
+            {...form.getInputProps('brandId')}
+          />
 
-    const isSubmitting = createMutation.isPending || updateMutation.isPending;
+          <DateInput
+            label="Ngày mua"
+            placeholder="Chọn ngày"
+            valueFormat="DD/MM/YYYY"
+            clearable
+            {...form.getInputProps('purchaseDate')}
+          />
 
-    return (
-        <Drawer
-            opened={opened}
-            onClose={onClose}
-            title={isEditing ? 'Chỉnh sửa thiết bị' : 'Thêm thiết bị mới'}
-            position="right"
-            size="md"
-        >
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-                <Stack gap="md">
-                    <TextInput
-                        label="Tên thiết bị"
-                        placeholder="VD: Microphone SM58"
-                        withAsterisk
-                        {...form.getInputProps('name')}
-                    />
+          <Select
+            label="Tình trạng"
+            data={statusOptions}
+            {...form.getInputProps('status')}
+          />
 
-                    <Select
-                        label="Hãng sản xuất"
-                        placeholder="Chọn hãng"
-                        data={brandOptions}
-                        searchable
-                        clearable
-                        {...form.getInputProps('brand_id')}
-                    />
+          <DepartmentSelect
+            label="Bộ phận"
+            placeholder="Chọn bộ phận"
+            clearable
+            {...form.getInputProps('departmentId')}
+          />
 
-                    <DateInput
-                        label="Ngày mua"
-                        placeholder="Chọn ngày"
-                        valueFormat="DD/MM/YYYY"
-                        clearable
-                        {...form.getInputProps('purchase_date')}
-                    />
-
-                    <Select
-                        label="Tình trạng"
-                        data={statusOptions}
-                        {...form.getInputProps('status')}
-                    />
-
-                    <Select
-                        label="Bộ phận"
-                        placeholder="Chọn bộ phận"
-                        clearable
-                        data={departmentOptions}
-                        {...form.getInputProps('department_id')}
-                    />
-
-                    <Button type="submit" fullWidth mt="md" loading={isSubmitting}>
-                        {isEditing ? 'Cập nhật' : 'Thêm thiết bị'}
-                    </Button>
-                </Stack>
-            </form>
-        </Drawer>
-    );
+          <Button type="submit" fullWidth mt="md" loading={isSubmitting}>
+            {isEditing ? 'Cập nhật' : 'Thêm thiết bị'}
+          </Button>
+        </Stack>
+      </form>
+    </Drawer>
+  );
 }

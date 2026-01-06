@@ -8,7 +8,7 @@ router.get('/equipment/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const equipment = await prisma.equipment.findUnique({
-            where: { id: Number(id) },
+            where: { id },
             include: {
                 department: true,
                 brand: true,

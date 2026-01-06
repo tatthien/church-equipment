@@ -60,7 +60,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
         const { name, description } = req.body;
 
         const brand = await prisma.brand.update({
-            where: { id: Number(id) },
+            where: { id },
             data: {
                 name,
                 description,
@@ -85,7 +85,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     try {
         const { id } = req.params;
         await prisma.brand.delete({
-            where: { id: Number(id) },
+            where: { id },
         });
         res.json({ message: 'Brand deleted' });
     } catch (error: any) {
