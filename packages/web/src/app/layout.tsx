@@ -2,7 +2,7 @@ import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import '@mantine/dates/styles.css'
 
-import { ColorSchemeScript, MantineProvider, createTheme } from '@mantine/core'
+import { ColorSchemeScript, MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { AuthProvider } from '@/lib/auth'
 import QueryProvider from '@/components/QueryProvider'

@@ -103,7 +103,7 @@ export default function HomePage() {
         message: 'Đã xóa thiết bị',
         color: 'green',
       })
-    } catch (error) {
+    } catch {
       notifications.show({
         title: 'Lỗi',
         message: 'Không thể xóa thiết bị',

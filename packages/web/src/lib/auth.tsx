@@ -3,16 +3,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { authApi } from './api'
+import { UserResponse } from '@/types/schemas'
 
-interface User {
-  id: string;
-  username: string;
-  name: string;
-  role: string;
-}
-
-interface AuthContextType {
-  user: User | null;
+type AuthContextType = {
+  user: UserResponse | null;
   token: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
@@ -22,7 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<UserResponse | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
@@ -45,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setUser(userData)
     setToken(authToken)
+
     localStorage.setItem('token', authToken)
     localStorage.setItem('user', JSON.stringify(userData))
 
