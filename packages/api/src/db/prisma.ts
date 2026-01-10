@@ -1,12 +1,10 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaLibSql } from '@prisma/adapter-libsql'
 
-const adapter = new PrismaLibSql({
-  url: process.env.DATABASE_URL ?? '',
-})
+import { PrismaPg } from '@prisma/adapter-pg'
 
-const prisma = new PrismaClient({
-  adapter,
-})
+const connectionString = `${process.env.DATABASE_URL}`
+
+const adapter = new PrismaPg({ connectionString })
+const prisma = new PrismaClient({ adapter })
 
 export default prisma

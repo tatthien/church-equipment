@@ -3,27 +3,27 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Brand {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String   @unique
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
 
-  equipment   Equipment[]
+  equipment Equipment[]
 
   @@map("brands")
 }
 
 model Department {
-  id          String     @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String   @unique
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
 
-  equipment   Equipment[]
+  equipment Equipment[]
 
   @@map("departments")
 }
@@ -31,23 +31,23 @@ model Department {
 model Equipment {
   id           String    @id @default(cuid())
   name         String
-  purchaseDate DateTime?   @map("purchase_date")
+  purchaseDate DateTime? @map("purchase_date")
   createdAt    DateTime  @default(now()) @map("created_at")
   status       String    @default("new")
-  
-  departmentId String?      @map("department_id")
-  createdBy    String?      @map("created_by")
-  brandId      String?      @map("brand_id")
 
-  department   Department? @relation(fields: [departmentId], references: [id])
-  creator      User?       @relation(fields: [createdBy], references: [id])
-  brand        Brand?      @relation(fields: [brandId], references: [id])
+  departmentId String? @map("department_id")
+  createdBy    String? @map("created_by")
+  brandId      String? @map("brand_id")
+
+  department Department? @relation(fields: [departmentId], references: [id])
+  creator    User?       @relation(fields: [createdBy], references: [id])
+  brand      Brand?      @relation(fields: [brandId], references: [id])
 
   @@map("equipment")
 }
 
 model User {
-  id        String     @id @default(cuid())
+  id        String   @id @default(cuid())
   username  String   @unique
   password  String
   name      String
