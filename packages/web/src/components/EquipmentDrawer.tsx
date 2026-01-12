@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { Drawer, TextInput, Select, Button, Stack } from '@mantine/core'
-import { DateInput } from '@mantine/dates'
+import { DateInput, DateTimePicker } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import {
@@ -14,6 +14,7 @@ import { equipmentSchema } from '@/lib/schemas'
 import { BrandSelect } from './BrandSelect'
 import { DepartmentSelect } from './DepartmentSelect'
 import { EquipmentResponse } from '@/types/schemas'
+import dayjs from 'dayjs'
 
 interface EquipmentDrawerProps {
   opened: boolean;
@@ -71,7 +72,7 @@ export default function EquipmentDrawer({
       const data = {
         name: values.name,
         brandId: values.brandId ? values.brandId : undefined,
-        purchaseDate: values.purchaseDate?.toISOString(),
+        purchaseDate: dayjs(values.purchaseDate).toISOString(),
         status: values.status as any,
         departmentId: values.departmentId ? values.departmentId : undefined,
       }
@@ -129,10 +130,9 @@ export default function EquipmentDrawer({
             {...form.getInputProps('brandId')}
           />
 
-          <DateInput
+          <DateTimePicker
             label="Ngày mua"
             placeholder="Chọn ngày"
-            valueFormat="DD/MM/YYYY"
             clearable
             {...form.getInputProps('purchaseDate')}
           />

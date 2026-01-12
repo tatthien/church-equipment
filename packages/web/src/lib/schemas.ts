@@ -8,7 +8,7 @@ export const loginSchema = z.object({
 export const equipmentSchema = z.object({
   name: z.string().min(1, 'Tên thiết bị là bắt buộc'),
   brandId: z.string().optional().nullable(),
-  purchaseDate: z.date().optional().nullable(),
+  purchaseDate: z.string().optional().nullable(),
   status: z.string(),
   departmentId: z.string().optional().nullable(),
 })
