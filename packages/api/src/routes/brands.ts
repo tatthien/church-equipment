@@ -19,6 +19,9 @@ router.get('/', async (req, res) => {
       orderBy: { name: 'asc' },
       skip: getSkip(page, limit),
       take: limit,
+      include: {
+        creator: true,
+      },
     })
 
     res.json(paginateResults(brands, total, page, limit))
@@ -43,6 +46,10 @@ router.post('/', async (req: AuthRequest, res) => {
       data: {
         name,
         description,
+        createdBy: req.user?.id,
+      },
+      include: {
+        creator: true,
       },
     })
 
@@ -73,6 +80,9 @@ router.put('/:id', async (req: AuthRequest, res) => {
       data: {
         name,
         description,
+      },
+      include: {
+        creator: true,
       },
     })
 

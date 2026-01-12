@@ -178,6 +178,7 @@ export default function DepartmentsPage() {
               <Table.Tr>
                 <Table.Th>Tên bộ phận</Table.Th>
                 <Table.Th>Mô tả</Table.Th>
+                <Table.Th>Người tạo</Table.Th>
                 <Table.Th>Ngày tạo</Table.Th>
                 <Table.Th w={100}></Table.Th>
               </Table.Tr>
@@ -187,6 +188,7 @@ export default function DepartmentsPage() {
                 <Table.Tr key={dept.id}>
                   <Table.Td fw={500}>{dept.name}</Table.Td>
                   <Table.Td>{dept.description || '-'}</Table.Td>
+                  <Table.Td>{dept.creator?.name || '-'}</Table.Td>
                   <Table.Td>
                     {dept.createdAt ? new Date(dept.createdAt).toLocaleDateString('vi-VN') : '-'}
                   </Table.Td>

@@ -179,6 +179,7 @@ export default function BrandsPage() {
               <Table.Tr>
                 <Table.Th>Tên hãng</Table.Th>
                 <Table.Th>Mô tả</Table.Th>
+                <Table.Th>Người tạo</Table.Th>
                 <Table.Th>Ngày tạo</Table.Th>
                 <Table.Th w={100}></Table.Th>
               </Table.Tr>
@@ -188,6 +189,7 @@ export default function BrandsPage() {
                 <Table.Tr key={brand.id}>
                   <Table.Td fw={500}>{brand.name}</Table.Td>
                   <Table.Td>{brand.description || '-'}</Table.Td>
+                  <Table.Td>{brand.creator?.name || '-'}</Table.Td>
                   <Table.Td>
                     {brand.createdAt ? new Date(brand.createdAt).toLocaleDateString('vi-VN') : '-'}
                   </Table.Td>

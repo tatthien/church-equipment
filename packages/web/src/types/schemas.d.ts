@@ -574,6 +574,7 @@ export interface components {
              * @example 2024-01-01T00:00:00.000Z
              */
       createdAt: string;
+      creator?: components['schemas']['UserResponse'] & unknown;
       /** @example Musical instruments manufacturer */
       description?: string | null;
       /** @example cm1... */
@@ -611,6 +612,7 @@ export interface components {
              * @example 2024-01-01T00:00:00.000Z
              */
       createdAt: string;
+      creator?: components['schemas']['UserResponse'] & unknown;
       /** @example Audio equipment */
       description?: string | null;
       /** @example cm1... */

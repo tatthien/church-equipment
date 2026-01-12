@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
+import { UserSchema } from './auth.js'
 
 extendZodWithOpenApi(z)
 
@@ -8,6 +9,7 @@ export const BrandSchema = z.object({
   name: z.string().min(1).openapi({ example: 'Yamaha' }),
   description: z.string().optional().nullable().openapi({ example: 'Musical instruments manufacturer' }),
   createdAt: z.string().datetime().openapi({ example: '2024-01-01T00:00:00.000Z' }),
+  creator: UserSchema.optional().nullable(),
 }).openapi('BrandResponse')
 
 export const CreateBrandSchema = BrandSchema.pick({

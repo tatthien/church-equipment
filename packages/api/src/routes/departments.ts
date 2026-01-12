@@ -27,6 +27,9 @@ router.get('/', async (req, res) => {
       orderBy: { name: 'asc' },
       skip: getSkip(page, limit),
       take: limit,
+      include: {
+        creator: true,
+      },
     })
 
     res.json(paginateResults(departments, total, page, limit))
@@ -42,6 +45,9 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params
     const department = await prisma.department.findUnique({
       where: { id },
+      include: {
+        creator: true,
+      },
     })
 
     if (!department) {
@@ -70,6 +76,10 @@ router.post('/', async (req: AuthRequest, res) => {
       data: {
         name,
         description,
+        createdBy: req.user?.id,
+      },
+      include: {
+        creator: true,
       },
     })
 
@@ -100,6 +110,9 @@ router.put('/:id', async (req: AuthRequest, res) => {
       data: {
         name,
         description,
+      },
+      include: {
+        creator: true,
       },
     })
 
