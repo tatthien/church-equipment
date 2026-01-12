@@ -15,6 +15,7 @@ import { BrandSelect } from './BrandSelect'
 import { DepartmentSelect } from './DepartmentSelect'
 import { EquipmentResponse } from '@/types/schemas'
 import dayjs from 'dayjs'
+import z from 'zod'
 
 interface EquipmentDrawerProps {
   opened: boolean;
@@ -40,11 +41,11 @@ export default function EquipmentDrawer({
   const createMutation = useCreateEquipmentMutation()
   const updateMutation = useUpdateEquipmentMutation()
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof equipmentSchema>>({
     initialValues: {
       name: '',
       brandId: '',
-      purchaseDate: null as Date | null,
+      purchaseDate: null,
       status: 'new',
       departmentId: '',
     },
@@ -57,7 +58,7 @@ export default function EquipmentDrawer({
         form.setValues({
           name: equipment.name,
           brandId: equipment.brandId ? equipment.brandId : '',
-          purchaseDate: equipment.purchaseDate ? new Date(equipment.purchaseDate) : null,
+          purchaseDate: equipment.purchaseDate,
           status: equipment.status,
           departmentId: equipment.departmentId ? equipment.departmentId : '',
         })
